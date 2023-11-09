@@ -1,0 +1,16 @@
+[package]
+name = "baby_wolfie"
+version = "1.0.0"
+authors = []
+
+[addresses]
+addr="0x6511db44e329aa332bfa55ab143643c0d48ae2672369445838aaf42fcc26d433"
+
+[dev-addresses]
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dev-dependencies]
