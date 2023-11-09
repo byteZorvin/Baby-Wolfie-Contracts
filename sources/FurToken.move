@@ -1,4 +1,4 @@
-module addr::FURToken {
+module owner::FURToken {
     use aptos_framework::fungible_asset::{Self, MintRef, TransferRef, BurnRef, Metadata, FungibleAsset};
     use aptos_framework::object::{Self, Object};
     use aptos_framework::primary_fungible_store;
@@ -18,6 +18,25 @@ module addr::FURToken {
         mint_ref: MintRef,
         transfer_ref: TransferRef,
         burn_ref: BurnRef,
+    }
+
+    struct MyCollectionMetadata has key {
+        creation_timestamp_secs: u64,
+    }
+
+    public entry fun create_collection(creator: &signer) {
+        // Constructor ref is a non-storable struct returned when creating a new object.
+        // It can generate an object signer to add resources to the collection object.
+        let collection_constructor_ref = &collection::create_unlimited_collection(
+            creator,
+            "My Collection Description",
+            "My Collection",
+            royalty,
+            "https://mycollection.com",
+        );
+        // Constructor ref can be exchanged for signer to add resources to the collection object.
+        let collection_signer = &object::generate_signer(collection_constructor_ref);
+        move_to(collection_signer, MyCollectionMetadata { creation_timestamp_secs: timestamp::now_seconds() } })
     }
 
     /// Initialize metadata object and store the refs.
