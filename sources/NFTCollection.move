@@ -1,10 +1,11 @@
 module owner::NFTCollection {
-    use aptos_framework::fungible_asset::{Self, Metadata};
-    use aptos_framework::object::{Self, Object};
+    use aptos_framework::fungible_asset;
+    use aptos_framework::object;
     use aptos_framework::primary_fungible_store;
     use aptos_token_objects::collection;
     use aptos_token_objects::token;
-    use std::signer;
+    use std::option;
+    use std::string;
 
     const CHARACTER_COLLECTION_NAME: vector<u8> = b"CHARACTER Collection Name";
     /// The CHARACTER collection description
@@ -12,7 +13,7 @@ module owner::NFTCollection {
     /// The CHARACTER collection URI
     const CHARACTER_COLLECTION_URI: vector<u8> = b"https://CHARACTER.collection.uri";
 
-    public fun init_module(sender: &signer) {
+    fun init_module(sender: &signer) {
         create_character_collection(sender);
     }
 
