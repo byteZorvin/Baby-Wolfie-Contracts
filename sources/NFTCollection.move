@@ -8,7 +8,6 @@ module owner::NFTCollection {
     use std::option::{Self, Option};
     use std::string::{Self, String};
     use std::debug;
-    use std::signer;
     
     use owner::random;
 
@@ -137,7 +136,7 @@ module owner::NFTCollection {
     }
     
     const RABBIT_PROBABILITY: u64 = 90;
-    public entry fun mint(creator: &signer, receiver: address, amount: u64) {
+    public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character {
         let random_number = random::rand_u64_range_no_sender(0, 100);
         let is_sheep = random_number <= RABBIT_PROBABILITY;
         debug::print(&random_number);
@@ -150,18 +149,12 @@ module owner::NFTCollection {
         };
     }
 
-    fun mint_internal(creator: &signer, token: Object<Character>, receiver: address, amount: u64) acquires Character{
-        // let token_address = object::object_address(token);
-        // let character_token = borrow_global<Character>(token_address);
-        let character_token = authorize_borrow<Character>(creator, &token);
-        let fa = fungible_asset::mint(character_token.fungible_asset_mint_ref, amount);
+    fun mint_internal(_creator: &signer, token: Object<Character>, receiver: address, amount: u64) acquires Character {
+        
+        let token_address = object::object_address(&token);
+        let character_token = borrow_global<Character>(token_address);
+        let fa = fungible_asset::mint(&character_token.fungible_asset_mint_ref, amount);
         primary_fungible_store::deposit(receiver, fa);
-    }
-
-    inline fun authorize_borrow<T: key>(creator: &signer, token: &Object<T>): &Character {
-        let token_address = object::object_address(token);
-        assert!(token::creator(*token) == signer::address_of(creator), ENOT_CREATOR);
-        borrow_global<Character>(token_address)
     }
 
 
@@ -182,22 +175,23 @@ module owner::NFTCollection {
         init_module(creator);
     }
      
-    #[test(creator=@owner, framework=@0x1)] 
-    fun test_mint(creator: &signer, framework: &signer) {
+    #[test(creator=@owner, framework=@0x1, user1=@0xcafe, user2=@0x89)] 
+    fun test_mint(creator: &signer, framework: &signer, user1: &signer, user2: &signer) acquires Character {
         
         let framework_addr = signer::address_of(framework);
         let framework_acc = &account::create_account_for_test(framework_addr);
 
         block::initialize_for_test(framework_acc, 10000);
         timestamp::set_time_has_started_for_testing(framework);
+        debug::print(&string::utf8(b"time initially: "));
+        debug::print(&timestamp::now_seconds());
 
         init_module(creator);
+        mint(user1, signer::address_of(user2), 1u64);
 
-
-        mint();
-        // let a = block::get_current_block_height();
-        // debug::print(&a);
-
+        timestamp::update_global_time_for_test_secs(100);
+        debug::print(&string::utf8(b"time afterwards: "));
+        debug::print(&timestamp::now_seconds());
     }
 
 }
