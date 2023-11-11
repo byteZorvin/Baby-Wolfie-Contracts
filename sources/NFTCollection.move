@@ -1,13 +1,18 @@
 module owner::NFTCollection {
     use aptos_framework::fungible_asset;
-    use aptos_framework::object;
+    use aptos_framework::object::{Self, Object};
     use aptos_framework::primary_fungible_store;
     use aptos_token_objects::collection;
     use aptos_token_objects::property_map;
     use aptos_token_objects::token;
     use std::option::{Self, Option};
     use std::string::{Self, String};
+    use std::debug;
+    use std::signer;
+    
+    use owner::random;
 
+    const ENOT_CREATOR: u64 = 0;
     const CHARACTER_COLLECTION_NAME: vector<u8> = b"CHARACTER Collection Name";
     /// The CHARACTER collection description
     const CHARACTER_COLLECTION_DESCRIPTION: vector<u8> = b"CHARACTER Collection Description";
@@ -35,7 +40,7 @@ module owner::NFTCollection {
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             option::some(13500u128),
             string::utf8(b"Rabbit"),
-            string::utf8(b"RABBIT"),
+            string::utf8(b"RB"),
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             string::utf8(b"https://www.aptoslabs.com"),
         );
@@ -46,7 +51,7 @@ module owner::NFTCollection {
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             option::some(1500u128),
             string::utf8(b"Baby Wolfie"),
-            string::utf8(b"BABY WOLFIE"),
+            string::utf8(b"BWOLF"),
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             string::utf8(b"https://www.aptoslabs.com"),
         )
@@ -119,6 +124,80 @@ module owner::NFTCollection {
             fungible_asset_burn_ref,
         };
         move_to(&object_signer, character_token);
+    }
+
+    #[view]
+    public fun rabbit_token_address(): address {
+        token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(RABBIT_TOKEN_NAME))
+    }
+
+    #[view]
+    public fun baby_wolfie_token_address(): address {
+        token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(BABY_WOLFIE_TOKEN_NAME))
+    }
+    
+    const RABBIT_PROBABILITY: u64 = 90;
+    public entry fun mint(creator: &signer, receiver: address, amount: u64) {
+        let random_number = random::rand_u64_range_no_sender(0, 100);
+        let is_sheep = random_number <= RABBIT_PROBABILITY;
+        debug::print(&random_number);
+        if(is_sheep) {
+            let rabbit_token = object::address_to_object<Character>(rabbit_token_address());
+            mint_internal(creator, rabbit_token, receiver, amount);
+        } else {
+            let baby_wolfie_token = object::address_to_object<Character>(baby_wolfie_token_address());
+            mint_internal(creator, baby_wolfie_token, receiver, amount);
+        };
+    }
+
+    fun mint_internal(creator: &signer, token: Object<Character>, receiver: address, amount: u64) acquires Character{
+        // let token_address = object::object_address(token);
+        // let character_token = borrow_global<Character>(token_address);
+        let character_token = authorize_borrow<Character>(creator, &token);
+        let fa = fungible_asset::mint(character_token.fungible_asset_mint_ref, amount);
+        primary_fungible_store::deposit(receiver, fa);
+    }
+
+    inline fun authorize_borrow<T: key>(creator: &signer, token: &Object<T>): &Character {
+        let token_address = object::object_address(token);
+        assert!(token::creator(*token) == signer::address_of(creator), ENOT_CREATOR);
+        borrow_global<Character>(token_address)
+    }
+
+
+    #[test_only]
+    use aptos_framework::block;
+
+    #[test_only]
+    use aptos_framework::timestamp;
+
+    #[test_only]
+    use aptos_framework::account;
+
+    #[test_only]
+    use std::signer;
+
+    #[test(creator=@owner)]
+    public fun init_module_for_test(creator: &signer) {
+        init_module(creator);
+    }
+     
+    #[test(creator=@owner, framework=@0x1)] 
+    fun test_mint(creator: &signer, framework: &signer) {
+        
+        let framework_addr = signer::address_of(framework);
+        let framework_acc = &account::create_account_for_test(framework_addr);
+
+        block::initialize_for_test(framework_acc, 10000);
+        timestamp::set_time_has_started_for_testing(framework);
+
+        init_module(creator);
+
+
+        mint();
+        // let a = block::get_current_block_height();
+        // debug::print(&a);
+
     }
 
 }
