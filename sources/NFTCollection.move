@@ -8,6 +8,7 @@ module owner::NFTCollection {
     use std::option::{Self, Option};
     use std::string::{Self, String};
     use std::debug;
+    use std::signer;
     
     use owner::random;
 
@@ -19,6 +20,24 @@ module owner::NFTCollection {
     const CHARACTER_COLLECTION_URI: vector<u8> = b"https://CHARACTER.collection.uri";
     const RABBIT_TOKEN_NAME: vector<u8> = b"Rabbit Token";
     const BABY_WOLFIE_TOKEN_NAME: vector<u8> = b"Baby Wolfie Token";
+
+
+    #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
+    /// Represents the common fields for a collection.
+    struct Collection has key {
+        /// The creator of this collection.
+        // creator: address,
+        // /// A brief description of the collection.
+        // description: String,
+        // /// An optional categorization of similar token.
+        // name: String,
+        // /// The Uniform Resource Identifier (uri) pointing to the JSON file stored in off-chain
+        // /// storage; the URL length will likely need a maximum any suggestions?
+        // uri: String,
+
+        mutator_ref: collection::MutatorRef,
+    }
+
 
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
     struct Character has key {
@@ -64,7 +83,7 @@ module owner::NFTCollection {
         let maxSupply = 15000;
 
         // Creates the collection with fixed supply
-        collection::create_fixed_collection(
+        let constructor_ref = collection::create_fixed_collection(
             creator,
             description,
             maxSupply,
@@ -72,6 +91,13 @@ module owner::NFTCollection {
             option::none(),
             uri,
         );
+
+        let object_signer = object::generate_signer(&constructor_ref);
+        let collection = Collection {
+            mutator_ref : collection::generate_mutator_ref(&constructor_ref)
+        };
+
+        move_to(&object_signer, collection)
     }
 
     fun create_chracter_token_as_fungible_token(
@@ -134,6 +160,14 @@ module owner::NFTCollection {
     public fun baby_wolfie_token_address(): address {
         token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(BABY_WOLFIE_TOKEN_NAME))
     }
+
+    // #[view]
+    // /// Returns the balance of the food token of the owner
+    // public fun token_balance(creator: address, token: Object<Character>): u64 {
+    //     let metadata = object::convert<Character, Metadata>(food);
+    //     let store = primary_fungible_store::ensure_primary_store_exists(creator, metadata);
+    //     fungible_asset::balance(store)
+    // }
     
     const RABBIT_PROBABILITY: u64 = 90;
     public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character {
@@ -155,6 +189,19 @@ module owner::NFTCollection {
         let character_token = borrow_global<Character>(token_address);
         let fa = fungible_asset::mint(&character_token.fungible_asset_mint_ref, amount);
         primary_fungible_store::deposit(receiver, fa);
+
+        // let collection_addr = collection::create_collection_address(&signer::address_of(creator), &string::utf8(CHARACTER_COLLECTION_NAME));
+        // // let supply = borrow_global<collection:: FixedSupply>(collection_addr).current_supply;
+        // debug::print(&string::utf8(b"Current supply is: "));
+        // debug::print(&supply);
+        
+        
+        // let collection = object::address_to_object<>(collection_addr);
+        // let count = collection::count(collection);
+        // debug::print(&string::utf8(b"Count:"));
+        // debug::print(&count);
+        let supply = fungible_asset::supply(token);
+        debug::print(&supply);
     }
 
 
@@ -166,9 +213,6 @@ module owner::NFTCollection {
 
     #[test_only]
     use aptos_framework::account;
-
-    #[test_only]
-    use std::signer;
 
     #[test(creator=@owner)]
     public fun init_module_for_test(creator: &signer) {
