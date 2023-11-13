@@ -6,13 +6,14 @@ module owner::NFTCollection {
     use aptos_token_objects::property_map;
     use aptos_token_objects::token;
     use aptos_framework::aptos_coin::AptosCoin;
+    use std::math64::{pow};
     use aptos_framework::coin;
     use std::option::{Self, Option};
     use std::string::{Self, String};
     use std::debug;
     use std::signer;
     use owner::random;
-
+    use owner::FURToken;
 
     //Error codes
     const ENOT_CREATOR: u64 = 0;
@@ -187,7 +188,8 @@ module owner::NFTCollection {
         };
     }
 
-    fun mint_internal(sender: &signer, token: Object<Character>, receiver: &signer, amount: u64) acquires Character {
+
+    fun mint_internal(_sender: &signer, token: Object<Character>, receiver: &signer, amount: u64) acquires Character {
         
         let token_address = object::object_address(&token);
         let receiver_address = signer::address_of(receiver);
@@ -196,20 +198,47 @@ module owner::NFTCollection {
         primary_fungible_store::deposit(receiver_address, fa);
 
         //Total token supply 
-        let token_supply = fungible_asset::supply(token);
-        // if (token_supply == option::some(11)) {
-        //     debug::print(&string::utf8(b"total supply ok !!"));
-        // };
-        if(token_supply < option::some(10000)) {
-            debug::print(&token_supply);
-            assert!(option::destroy_some(token_supply) + (amount as u128) <= 10000, EALL_MINTED);
+        let token_current_supply = option::destroy_some<u128>(fungible_asset::supply(token));
+        if(token_current_supply < 10000u128) {
+            debug::print(&string::utf8(b"token supply"));
+            debug::print(&token_current_supply);
+            assert!(token_current_supply + (amount as u128) <= 10000, EALL_MINTED);
             let price = 10000000 * amount;
-            assert!(coin::balance<AptosCoin>(receiver_address) >= price, EINSUFFICIENT_APT_BALANCE);
-            coin::transfer<AptosCoin>(receiver, signer::address_of(sender), amount*price);
+            debug::print(&price);
+            // assert!(coin::balance<AptosCoin>(receiver_address) >= price, EINSUFFICIENT_APT_BALANCE);
+            // coin::transfer<AptosCoin>(receiver, signer::address_of(sender), amount*price);
         }
-        // let store = primary_fungible_store::primary_store(signer::address_of(sender), Object<AptosCoin>);
-        // debug::print(&store);
-        // primary_fungible_store::transfer<AptosCoin>(sender, A, ,amount*price)
+        else {
+            debug::print(&string::utf8(b"Supply greater than 10k"));
+            let _price = mint_cost(token_current_supply);
+            
+            let decimals = fungible_asset::decimals(token);
+            let decimal_offset = pow(10u64, (decimals as u64)); 
+
+            debug::print(&string::utf8(b"decimals"));
+            debug::print(&decimals);
+            debug::print(&string::utf8(b"decimal offset"));
+            debug::print(&decimal_offset);
+
+            let asset = FURToken::get_metadata();
+            debug::print(&string::utf8(b"Medatadata"));
+            debug::print(&asset);
+            
+
+            // primary_fungible_store::transfer(sender, asset, receiver_address, amount*price*decimal_offset); 
+        }
+        
+    }
+
+    fun mint_cost(current_supply: u128): u64 {
+        if (current_supply <= 10000u128) {
+            return 0u64
+        } else if (current_supply <= 20000u128) {
+            return 20000u64
+        } else if (current_supply <= 20000u128) {
+            return 40000u64
+        };
+        80000u64
     }
 
 
@@ -243,8 +272,8 @@ module owner::NFTCollection {
         let account_addr = signer::address_of(user1);
         account::create_account_for_test(account_addr);
         coin::register<AptosCoin>(user1);
-        mint(user1, user1, 1u64);
-        mint(user2, user2, 10u64);
+        mint(user1, user1, 10000u64);
+        mint(user2, user2, 1u64);
 
         timestamp::update_global_time_for_test_secs(100);
         debug::print(&string::utf8(b"time afterwards: "));
