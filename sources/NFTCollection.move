@@ -5,18 +5,22 @@ module owner::NFTCollection {
     use aptos_token_objects::collection;
     use aptos_token_objects::property_map;
     use aptos_token_objects::token;
+    use aptos_framework::aptos_coin::AptosCoin;
+    use aptos_framework::coin;
     use std::option::{Self, Option};
     use std::string::{Self, String};
     use std::debug;
     use std::signer;
-    
     use owner::random;
 
+
+    //Error codes
     const ENOT_CREATOR: u64 = 0;
+    const EALL_MINTED: u64 = 1;
+    const EINSUFFICIENT_APT_BALANCE: u64 = 2;
+
     const CHARACTER_COLLECTION_NAME: vector<u8> = b"CHARACTER Collection Name";
-    /// The CHARACTER collection description
     const CHARACTER_COLLECTION_DESCRIPTION: vector<u8> = b"CHARACTER Collection Description";
-    /// The CHARACTER collection URI
     const CHARACTER_COLLECTION_URI: vector<u8> = b"https://CHARACTER.collection.uri";
     const RABBIT_TOKEN_NAME: vector<u8> = b"Rabbit Token";
     const BABY_WOLFIE_TOKEN_NAME: vector<u8> = b"Baby Wolfie Token";
@@ -170,7 +174,7 @@ module owner::NFTCollection {
     // }
     
     const RABBIT_PROBABILITY: u64 = 90;
-    public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character {
+    public entry fun mint(creator: &signer, receiver: &signer, amount: u64) acquires Character {
         let random_number = random::rand_u64_range_no_sender(0, 100);
         let is_sheep = random_number <= RABBIT_PROBABILITY;
         debug::print(&random_number);
@@ -183,25 +187,29 @@ module owner::NFTCollection {
         };
     }
 
-    fun mint_internal(_creator: &signer, token: Object<Character>, receiver: address, amount: u64) acquires Character {
+    fun mint_internal(sender: &signer, token: Object<Character>, receiver: &signer, amount: u64) acquires Character {
         
         let token_address = object::object_address(&token);
+        let receiver_address = signer::address_of(receiver);
         let character_token = borrow_global<Character>(token_address);
         let fa = fungible_asset::mint(&character_token.fungible_asset_mint_ref, amount);
-        primary_fungible_store::deposit(receiver, fa);
+        primary_fungible_store::deposit(receiver_address, fa);
 
-        // let collection_addr = collection::create_collection_address(&signer::address_of(creator), &string::utf8(CHARACTER_COLLECTION_NAME));
-        // // let supply = borrow_global<collection:: FixedSupply>(collection_addr).current_supply;
-        // debug::print(&string::utf8(b"Current supply is: "));
-        // debug::print(&supply);
-        
-        
-        // let collection = object::address_to_object<>(collection_addr);
-        // let count = collection::count(collection);
-        // debug::print(&string::utf8(b"Count:"));
-        // debug::print(&count);
-        let supply = fungible_asset::supply(token);
-        debug::print(&supply);
+        //Total token supply 
+        let token_supply = fungible_asset::supply(token);
+        // if (token_supply == option::some(11)) {
+        //     debug::print(&string::utf8(b"total supply ok !!"));
+        // };
+        if(token_supply < option::some(10000)) {
+            debug::print(&token_supply);
+            assert!(option::destroy_some(token_supply) + (amount as u128) <= 10000, EALL_MINTED);
+            let price = 10000000 * amount;
+            assert!(coin::balance<AptosCoin>(receiver_address) >= price, EINSUFFICIENT_APT_BALANCE);
+            coin::transfer<AptosCoin>(receiver, signer::address_of(sender), amount*price);
+        }
+        // let store = primary_fungible_store::primary_store(signer::address_of(sender), Object<AptosCoin>);
+        // debug::print(&store);
+        // primary_fungible_store::transfer<AptosCoin>(sender, A, ,amount*price)
     }
 
 
@@ -231,11 +239,20 @@ module owner::NFTCollection {
         debug::print(&timestamp::now_seconds());
 
         init_module(creator);
-        mint(user1, signer::address_of(user2), 1u64);
+
+        let account_addr = signer::address_of(user1);
+        account::create_account_for_test(account_addr);
+        coin::register<AptosCoin>(user1);
+        mint(user1, user1, 1u64);
+        mint(user2, user2, 10u64);
 
         timestamp::update_global_time_for_test_secs(100);
         debug::print(&string::utf8(b"time afterwards: "));
         debug::print(&timestamp::now_seconds());
+
+        let balance = coin::balance<AptosCoin>(signer::address_of(user1));
+        debug::print(&string::utf8(b"Balance after transfer"));
+        debug::print(&balance);
     }
 
 }
