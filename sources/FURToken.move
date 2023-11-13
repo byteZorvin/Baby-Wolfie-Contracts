@@ -9,8 +9,6 @@ module owner::FURToken {
 
     #[test_only]
     use aptos_framework::account;
-    // #[test_only]j
-    // use std::signer;
 
 
     struct FurToken has key {
@@ -59,16 +57,16 @@ module owner::FURToken {
 
     public entry fun mint(to: address, amount: u64) acquires FurToken{
         let metadata = get_metadata();
-        debug::print(&metadata);
+        // debug::print(&metadata);
         let refs = borrow_global<FurToken>(object::object_address(&metadata));
-        debug::print(&refs.mint_ref);
+        // debug::print(&refs.mint_ref);
         let primary_store = primary_fungible_store::ensure_primary_store_exists(to, fungible_asset::mint_ref_metadata(&refs.mint_ref));
         fungible_asset::mint_to(&refs.mint_ref, primary_store, amount);
     }
 
     public entry fun burn(to: address, amount: u64) acquires FurToken{
         let metadata = get_metadata();
-        debug::print(&metadata);
+        // debug::print(&metadata);
         let refs = borrow_global<FurToken>(object::object_address(&metadata));
         let primary_store = primary_fungible_store::primary_store(to, fungible_asset::burn_ref_metadata(&refs.burn_ref));
         fungible_asset::burn_from(&refs.burn_ref, primary_store, amount);
@@ -104,7 +102,7 @@ module owner::FURToken {
     
     #[test_only]
     use std::signer;
-    use std::debug;
+    // use std::debug;
 
     #[test(creator=@owner)]
     fun e2e_ok(creator: &signer) acquires FurToken{
@@ -113,7 +111,7 @@ module owner::FURToken {
         let bob = account::create_account_for_test(@0xB);
 
         initialize(creator, b"FUR");
-        // let metadata = get_metadata();
+        let metadata = get_metadata();
         // debug::print(&metadata);
         mint(signer::address_of(&alice), 100);
         transfer(
@@ -124,6 +122,13 @@ module owner::FURToken {
         burn(
             signer::address_of(&alice),
             10
+        );
+
+        primary_fungible_store::transfer(
+            &alice,
+            metadata,
+            signer::address_of(&bob),
+            20
         );
        
         // let fa = fungible_asset::mint(&furToken.mint_ref, 10000);

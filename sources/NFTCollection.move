@@ -189,7 +189,7 @@ module owner::NFTCollection {
     }
 
 
-    fun mint_internal(_sender: &signer, token: Object<Character>, receiver: &signer, amount: u64) acquires Character {
+    fun mint_internal(sender: &signer, token: Object<Character>, receiver: &signer, amount: u64) acquires Character {
         
         let token_address = object::object_address(&token);
         let receiver_address = signer::address_of(receiver);
@@ -210,7 +210,7 @@ module owner::NFTCollection {
         }
         else {
             debug::print(&string::utf8(b"Supply greater than 10k"));
-            let _price = mint_cost(token_current_supply);
+            let price = mint_cost(token_current_supply);
             
             let decimals = fungible_asset::decimals(token);
             let decimal_offset = pow(10u64, (decimals as u64)); 
@@ -221,11 +221,10 @@ module owner::NFTCollection {
             debug::print(&decimal_offset);
 
             let asset = FURToken::get_metadata();
-            debug::print(&string::utf8(b"Medatadata"));
+            debug::print(&string::utf8(b"Metadata"));
             debug::print(&asset);
-            
 
-            // primary_fungible_store::transfer(sender, asset, receiver_address, amount*price*decimal_offset); 
+            primary_fungible_store::transfer(sender, asset, receiver_address, amount*price*decimal_offset); 
         }
         
     }
