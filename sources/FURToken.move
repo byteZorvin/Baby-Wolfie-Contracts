@@ -21,10 +21,9 @@ module owner::FURToken {
     const ASSET_SYMBOL: vector<u8> = b"FUR";
 
     public fun initialize(
-        account: &signer,
-        object_seed: vector<u8>
+        account: &signer
     ) {
-        let constructor_ref = &object::create_named_object(account, object_seed);
+        let constructor_ref = &object::create_named_object(account, b"FUR");
         primary_fungible_store::create_primary_store_enabled_fungible_asset(
             constructor_ref,
             option::none(),
@@ -57,16 +56,13 @@ module owner::FURToken {
 
     public entry fun mint(to: address, amount: u64) acquires FurToken{
         let metadata = get_metadata();
-        // debug::print(&metadata);
         let refs = borrow_global<FurToken>(object::object_address(&metadata));
-        // debug::print(&refs.mint_ref);
         let primary_store = primary_fungible_store::ensure_primary_store_exists(to, fungible_asset::mint_ref_metadata(&refs.mint_ref));
         fungible_asset::mint_to(&refs.mint_ref, primary_store, amount);
     }
 
     public entry fun burn(to: address, amount: u64) acquires FurToken{
         let metadata = get_metadata();
-        // debug::print(&metadata);
         let refs = borrow_global<FurToken>(object::object_address(&metadata));
         let primary_store = primary_fungible_store::primary_store(to, fungible_asset::burn_ref_metadata(&refs.burn_ref));
         fungible_asset::burn_from(&refs.burn_ref, primary_store, amount);
@@ -110,7 +106,7 @@ module owner::FURToken {
         let alice = account::create_account_for_test(@0xA);
         let bob = account::create_account_for_test(@0xB);
 
-        initialize(creator, b"FUR");
+        initialize(creator);
         let metadata = get_metadata();
         // debug::print(&metadata);
         mint(signer::address_of(&alice), 100);
