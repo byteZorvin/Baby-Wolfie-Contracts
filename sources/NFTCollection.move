@@ -166,33 +166,31 @@ module owner::NFTCollection {
         token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(BABY_WOLFIE_TOKEN_NAME))
     }
 
-    // #[view]
-    // /// Returns the balance of the food token of the owner
-    // public fun token_balance(creator: address, token: Object<Character>): u64 {
-    //     let metadata = object::convert<Character, Metadata>(food);
-    //     let store = primary_fungible_store::ensure_primary_store_exists(creator, metadata);
-    //     fungible_asset::balance(store)
-    // }
     
     const RABBIT_PROBABILITY: u64 = 90;
-    public entry fun mint(creator: &signer, receiver: &signer, amount: u64) acquires Character {
-        let random_number = random::rand_u64_range_no_sender(0, 100);
-        let is_sheep = random_number <= RABBIT_PROBABILITY;
-        debug::print(&random_number);
-        if(is_sheep) {
-            let rabbit_token = object::address_to_object<Character>(rabbit_token_address());
-            mint_internal(creator, rabbit_token, receiver, amount);
-        } else {
-            let baby_wolfie_token = object::address_to_object<Character>(baby_wolfie_token_address());
-            mint_internal(creator, baby_wolfie_token, receiver, amount);
+    public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character {
+        let i = 1;
+        while (i <= amount) {
+            
+            let random_number = random::rand_u64_range_no_sender(0, 100);
+            let is_sheep = random_number <= RABBIT_PROBABILITY;
+            debug::print(&string::utf8(b"Random number generate: "));
+            debug::print(&random_number);
+            if(is_sheep) {
+                let rabbit_token = object::address_to_object<Character>(rabbit_token_address());
+                mint_internal(creator, rabbit_token, receiver);
+            } else {
+                let baby_wolfie_token = object::address_to_object<Character>(baby_wolfie_token_address());
+                mint_internal(creator, baby_wolfie_token, receiver);
+            };
+
+            i = i + 1
         };
     }
 
 
-    fun mint_internal(sender: &signer, token: Object<Character>, receiver: &signer, amount: u64) acquires Character {
-        
+    fun mint_internal(sender: &signer, token: Object<Character>, receiver: address) acquires Character {
         let token_address = object::object_address(&token);
-        let receiver_address = signer::address_of(receiver);
         let character_token = borrow_global<Character>(token_address);
         
 
@@ -204,11 +202,11 @@ module owner::NFTCollection {
         if(token_current_supply < 10000u128) {
             debug::print(&string::utf8(b"token supply inside if"));
             debug::print(&token_current_supply);
-            assert!(token_current_supply + (amount as u128) <= 10000u128, EALL_MINTED);
-            let price = 10 * amount;
-            debug::print(&price);
-            assert!(coin::balance<AptosCoin>(receiver_address) >= price, EINSUFFICIENT_APT_BALANCE);
-            coin::transfer<AptosCoin>(receiver, signer::address_of(sender), amount*price);
+            assert!(token_current_supply + 1 <= 10000u128, EALL_MINTED);
+            let fixed_apt_price = 10;
+            debug::print(&fixed_apt_price);
+            assert!(coin::balance<AptosCoin>(signer::address_of(sender)) >= fixed_apt_price, EINSUFFICIENT_APT_BALANCE);
+            coin::transfer<AptosCoin>(sender, signer::address_of(sender), fixed_apt_price);
         }
         else {
             debug::print(&string::utf8(b"Supply greater than 10k"));
@@ -224,16 +222,15 @@ module owner::NFTCollection {
             debug::print(&decimals);
             debug::print(&string::utf8(b"decimal offset"));
             debug::print(&decimal_offset);
-            let amount_with_decimals = amount*price*decimal_offset;
-
+            let amount_with_decimals = price*decimal_offset;
             debug::print(&string::utf8(b"Metadata"));
             debug::print(&asset);
 
-            primary_fungible_store::transfer(sender, asset, receiver_address, amount_with_decimals); 
+            primary_fungible_store::transfer(sender, asset, @owner, amount_with_decimals); 
         };
 
-        let fa = fungible_asset::mint(&character_token.fungible_asset_mint_ref, amount);
-        primary_fungible_store::deposit(receiver_address, fa);
+        let fa = fungible_asset::mint(&character_token.fungible_asset_mint_ref, 1);
+        primary_fungible_store::deposit(receiver, fa);
         
     }
 
@@ -242,7 +239,7 @@ module owner::NFTCollection {
             return 0u64
         } else if (current_supply <= 20000u128) {
             return 20000u64
-        } else if (current_supply <= 20000u128) {
+        } else if (current_supply <= 40000u128) {
             return 40000u64
         };
         80000u64
@@ -301,23 +298,23 @@ module owner::NFTCollection {
         coin::destroy_mint_cap(mint_cap);
         coin::destroy_freeze_cap(freeze_cap);
         coin::destroy_burn_cap(burn_cap);
-        mint(user1, user1, 9999u64);
+        mint(user1, signer::address_of(user1), 10000u64);
         // -----------*--------------
 
 
         // -------------Set up for FurToken transfer --------
         FURToken::initialize(creator);
-        FURToken::mint(creator_addr, 900000_0000_0000);
-        FURToken::mint(signer::address_of(user1), 900000_0000_0000);
+        FURToken::mint(creator_addr, 30000_0000_0000);
+        FURToken::mint(signer::address_of(user1), 30000_0000_0000);
         
-        mint(user1, user1, 1u64);
+        // mint(user1, signer::address_of(user1), 1u64);
 
         let balance_furToken_before = primary_fungible_store::balance(signer::address_of(user1), FURToken::get_metadata());
         debug::print(&string::utf8(b"Balance before FurToken mint"));
         debug::print(&balance_furToken_before);
 
         // Minting 1 token in gen 1
-        mint(user1, user1, 1u64);
+        mint(user1, signer::address_of(user1), 1u64);
         
         let balance_furToken_after = primary_fungible_store::balance(signer::address_of(user1), FURToken::get_metadata());
         debug::print(&string::utf8(b"Balance after FurToken mint"));
@@ -328,5 +325,4 @@ module owner::NFTCollection {
         debug::print(&string::utf8(b"time afterwards: "));
         debug::print(&timestamp::now_seconds());
     }
-
 }
