@@ -35,13 +35,13 @@ module owner::NFTCollection {
     /// Represents the common fields for a collection.
     struct Collection has key {
         /// The creator of this collection.
-        // creator: address,
-        // /// A brief description of the collection.
+        // creator: {address},
+        // A brief description of the collection.
         // description: String,
-        // /// An optional categorization of similar token.
+        //  An optional categorization of similar token.
         // name: String,
-        // /// The Uniform Resource Identifier (uri) pointing to the JSON file stored in off-chain
-        // /// storage; the URL length will likely need a maximum any suggestions?
+        // The Uniform Resource Identifier (uri) pointing to the JSON file stored in off-chain
+        // storage; the URL length will likely need a maximum any suggestions?
         // uri: String,
 
         mutator_ref: collection::MutatorRef,
@@ -169,7 +169,6 @@ module owner::NFTCollection {
     public fun baby_wolfie_token_address(): address {
         token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(BABY_WOLFIE_TOKEN_NAME))
     }
-
     
     const RABBIT_PROBABILITY: u64 = 90;
     public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character {
@@ -197,7 +196,6 @@ module owner::NFTCollection {
         let token_address = object::object_address(&token);
         let character_token = borrow_global<Character>(token_address);
         
-
         //Total token supply 
         let token_current_supply = option::destroy_some<u128>(fungible_asset::supply(token));
         debug::print(&string::utf8(b"token supply outside if"));
@@ -206,11 +204,11 @@ module owner::NFTCollection {
         if(token_current_supply < 10000u128) {
             debug::print(&string::utf8(b"token supply inside if"));
             debug::print(&token_current_supply);
-            assert!(token_current_supply + 1 <= 10000u128, EALL_MINTED);
-            let fixed_apt_price = 10;
-            debug::print(&fixed_apt_price);
-            assert!(coin::balance<AptosCoin>(signer::address_of(sender)) >= fixed_apt_price, EINSUFFICIENT_APT_BALANCE);
-            coin::transfer<AptosCoin>(sender, signer::address_of(sender), fixed_apt_price);
+            assert!(token_current_supply + (amount as u128) <= 10000u128, EALL_MINTED);
+            let price = 1;
+            debug::print(&price);
+            assert!(coin::balance<AptosCoin>(receiver_address) >= price, EINSUFFICIENT_APT_BALANCE);
+            coin::transfer<AptosCoin>(receiver, @owner, amount*price);
         }
         else {
             debug::print(&string::utf8(b"Supply greater than 10k"));
@@ -286,8 +284,6 @@ module owner::NFTCollection {
         debug::print(&string::utf8(b"time initially: "));
         debug::print(&timestamp::now_seconds());
 
-      
-        // Initialise this contract
         init_module(creator);
 
         let account_addr = signer::address_of(user1);
@@ -308,19 +304,33 @@ module owner::NFTCollection {
         let balance = coin::balance<AptosCoin>(signer::address_of(user1));
         debug::print(&string::utf8(b"Balance after AptosCoin Deposit"));
         debug::print(&balance);
+
+        coin::register<AptosCoin>(creator);
+        let owner_balance = coin::balance<AptosCoin>(signer::address_of(creator));
+        debug::print(&string::utf8(b"Owner Balance before mint"));
+        debug::print(&owner_balance);
+        
         coin::destroy_mint_cap(mint_cap);
         coin::destroy_freeze_cap(freeze_cap);
         coin::destroy_burn_cap(burn_cap);
-        mint(user1, signer::address_of(user1), 10000u64);
+        mint(user1, user1, 9999u64);
+
+        let owner_balance = coin::balance<AptosCoin>(signer::address_of(creator));
+        debug::print(&string::utf8(b"Owner Balance after mint"));
+        debug::print(&owner_balance);
+
         // -----------*--------------
 
 
         // -------------Set up for FurToken transfer --------
         FURToken::initialize(creator);
-        FURToken::mint(creator_addr, 30000_0000_0000);
-        FURToken::mint(signer::address_of(user1), 30000_0000_0000);
+        FURToken::mint(signer::address_of(user1), 900000_0000_0000);
         
         // mint(user1, signer::address_of(user1), 1u64);
+
+        let owner_furToken_before = primary_fungible_store::balance(signer::address_of(creator), FURToken::get_metadata());
+        debug::print(&string::utf8(b"Owner balance before FurToken mint"));
+        debug::print(&owner_furToken_before);
 
         let balance_furToken_before = primary_fungible_store::balance(signer::address_of(user1), FURToken::get_metadata());
         let balance_character_before = primary_fungible_store::balance(signer::address_of(user1), get_metadata(RABBIT_TOKEN_NAME));
@@ -331,7 +341,11 @@ module owner::NFTCollection {
         debug::print(&balance_character_before);
 
         // Minting 1 token in gen 1
-        mint(user1, signer::address_of(user1), 1u64);
+        mint(user1, user1, 1u64);
+
+        let owner_furToken_after = primary_fungible_store::balance(signer::address_of(creator), FURToken::get_metadata());
+        debug::print(&string::utf8(b"Owner balance after FurToken mint"));
+        debug::print(&owner_furToken_after);
         
         let balance_furToken_after = primary_fungible_store::balance(signer::address_of(user1), FURToken::get_metadata());
         let balance_character_after = primary_fungible_store::balance(signer::address_of(user1), get_metadata(RABBIT_TOKEN_NAME));
@@ -342,6 +356,8 @@ module owner::NFTCollection {
         debug::print(&balance_character_after);
         // --------------------*------------------
 
+
+    
         timestamp::update_global_time_for_test_secs(100);
         debug::print(&string::utf8(b"time afterwards: "));
         debug::print(&timestamp::now_seconds());
