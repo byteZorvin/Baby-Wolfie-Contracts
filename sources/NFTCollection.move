@@ -11,33 +11,15 @@ module owner::NFTCollection {
     use std::option::{Self, Option};
     use std::string::{Self, String};
     use std::debug;
-    use std::signer;
+    // use std::signer;
     use owner::random;
     use owner::FURToken;
+    use owner::config;
 
     //Error codes
     const ENOT_CREATOR: u64 = 0;
     const EALL_MINTED: u64 = 1;
     const EINSUFFICIENT_APT_BALANCE: u64 = 2;
-
-    const CHARACTER_COLLECTION_NAME: vector<u8> = b"CHARACTER Collection Name";
-    const CHARACTER_COLLECTION_DESCRIPTION: vector<u8> = b"CHARACTER Collection Description";
-    const CHARACTER_COLLECTION_URI: vector<u8> = b"https://CHARACTER.collection.uri";
-    
-    const RABBIT_TOKEN_NAME: vector<u8> = b"Rabbit Token";
-    const RABBIT_SYMBOL_NAME: vector<u8> = b"RB";
-
-    const BABY_WOLFIE_TOKEN_NAME: vector<u8> = b"Baby Wolfie Token";
-    const BABY_WOLFIE_SYMBOL_NAME: vector<u8> = b"BW";
-
-
-
-
-
-    const Gen0_Max: u128 = 1u128;
-    const Gen1_Max: u128 = 20u128;
-    const Gen2_Max: u128 = 40u128;
-
 
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
     /// Represents the common fields for a collection.
@@ -71,32 +53,32 @@ module owner::NFTCollection {
         create_chracter_token_as_fungible_token(
             sender,
             string::utf8(b"Rabbit Token Description"),
-            string::utf8(RABBIT_TOKEN_NAME),
+            config::rabbit_token_name(),
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             option::some(45000u128),
             string::utf8(b"Rabbit"),
-            string::utf8(RABBIT_SYMBOL_NAME),
+            config::rabbit_symbol_name(),
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             string::utf8(b"https://www.aptoslabs.com"),
         );
         create_chracter_token_as_fungible_token(
             sender,
             string::utf8(b"Baby Wolfie Token Description"),
-            string::utf8(BABY_WOLFIE_TOKEN_NAME),
+            config::baby_wolfie_token_name(),
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             option::some(5000u128),
             string::utf8(b"Baby Wolfie"),
-            string::utf8(BABY_WOLFIE_SYMBOL_NAME),
+            config::baby_wolfie_symbol_name(),
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             string::utf8(b"https://www.aptoslabs.com"),
-        )
+        ) 
     }
 
     fun create_character_collection(creator: &signer) {
         // Constructs the strings from the bytes.
-        let description = string::utf8(CHARACTER_COLLECTION_DESCRIPTION);
-        let name = string::utf8(CHARACTER_COLLECTION_NAME);
-        let uri = string::utf8(CHARACTER_COLLECTION_URI);
+        let description = config::collection_description();
+        let name = config::collection_name();
+        let uri = config::collection_uri();
         let maxSupply = 2;    // No of different tokens
 
         // Creates the collection with fixed supply
@@ -129,7 +111,7 @@ module owner::NFTCollection {
         project_uri: String,
     ) {
         // The collection name is used to locate the collection object and to create a new token object.
-        let collection = string::utf8(CHARACTER_COLLECTION_NAME);
+        let collection = config::collection_name();
 
         let constructor_ref = token::create_named_token(
             creator,
@@ -170,12 +152,12 @@ module owner::NFTCollection {
 
     #[view]
     public fun rabbit_token_address(): address {
-        token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(RABBIT_TOKEN_NAME))
+        token::create_token_address(&@owner, &config::collection_name(), &config::rabbit_token_name())
     }
 
     #[view]
     public fun baby_wolfie_token_address(): address {
-        token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(BABY_WOLFIE_TOKEN_NAME))
+        token::create_token_address(&@owner, &config::collection_name(), &config::baby_wolfie_token_name())
     }
     
     const RABBIT_PROBABILITY: u64 = 90;
@@ -209,10 +191,10 @@ module owner::NFTCollection {
         debug::print(&string::utf8(b"token supply outside if"));
         debug::print(&token_current_supply);
 
-        if(token_current_supply < Gen0_Max) {
+        if(token_current_supply < config::gen0_max()) {
             debug::print(&string::utf8(b"token supply inside if"));
             debug::print(&token_current_supply);
-            assert!(token_current_supply + 1u128 <= Gen0_Max, EALL_MINTED);
+            assert!(token_current_supply + 1u128 <= config::gen0_max(), EALL_MINTED);
             let price = 1;
             debug::print(&price);
             assert!(coin::balance<AptosCoin>(receiver) >= price, EINSUFFICIENT_APT_BALANCE);
@@ -245,128 +227,25 @@ module owner::NFTCollection {
     }
 
     fun mint_cost(current_supply: u128): u64 {
-        if (current_supply < Gen0_Max) {
+        if (current_supply < config::gen0_max()) {
             return 0u64
-        } else if (current_supply <= Gen1_Max) {
+        } else if (current_supply <= config::gen1_max()) {
             return 20u64
-        } else if (current_supply <= Gen2_Max) {
+        } else if (current_supply <= config::gen2_max()) {
             return 40u64
         };
         80u64
     }
 
     #[view]
-    public fun get_metadata(token_name: vector<u8>): Object<Character> {
-        let asset_address: address = token::create_token_address(&@owner, &string::utf8(CHARACTER_COLLECTION_NAME), &string::utf8(token_name));
+    public fun get_metadata(token_name: String): Object<Character> {
+        let asset_address: address = token::create_token_address(&@owner, &config::collection_name(), &token_name);
         let token = object::address_to_object<Character>(asset_address);
         return token
     }
 
-
     #[test_only]
-    use aptos_framework::block;
-
-    #[test_only]
-    use aptos_framework::timestamp;
-
-    #[test_only]
-    use aptos_framework::account;
-
-    #[test(creator=@owner)]
-    public fun init_module_for_test(creator: &signer) {
-        init_module(creator);
-    }
-     
-    #[test(creator=@owner, framework=@0x1, user1=@0xcafe)] 
-    fun test_mint(creator: &signer, framework: &signer, user1: &signer) acquires Character {
-        // Setup accounts
-        let framework_addr = signer::address_of(framework);
-        let framework_acc = &account::create_account_for_test(framework_addr);
-
-        let creator_addr = signer::address_of(creator);
-        let _creator_acc = &account::create_account_for_test(creator_addr);
-
-        // Initialise aptos parameters
-        block::initialize_for_test(framework_acc, 10000);
-        timestamp::set_time_has_started_for_testing(framework);
-        debug::print(&string::utf8(b"time initially: "));
-        debug::print(&timestamp::now_seconds());
-
-        init_module(creator);
-
-        let account_addr = signer::address_of(user1);
-        account::create_account_for_test(account_addr);
-
-
-        //---------Set up for AptosCoin(APT) transfer---------
-        coin::register<AptosCoin>(user1);
-        let (burn_cap, freeze_cap, mint_cap) = coin::initialize<AptosCoin>(
-            framework,
-            string::utf8(b"APT"),
-            string::utf8(b"APT"),
-            8,
-            false,
-        );
-        let coins = coin::mint<AptosCoin>(1000000000, &mint_cap);
-        coin::deposit(signer::address_of(user1), coins);
-        let balance = coin::balance<AptosCoin>(signer::address_of(user1));
-        debug::print(&string::utf8(b"Balance after AptosCoin Deposit"));
-        debug::print(&balance);
-
-        coin::register<AptosCoin>(creator);
-        let owner_balance = coin::balance<AptosCoin>(signer::address_of(creator));
-        debug::print(&string::utf8(b"Owner Balance before mint"));
-        debug::print(&owner_balance);
-        
-        coin::destroy_mint_cap(mint_cap);
-        coin::destroy_freeze_cap(freeze_cap);
-        coin::destroy_burn_cap(burn_cap);
-        mint(user1, signer::address_of(user1), 1u64);
-
-        let owner_balance = coin::balance<AptosCoin>(signer::address_of(creator));
-        debug::print(&string::utf8(b"Owner Balance after mint"));
-        debug::print(&owner_balance);
-
-        // -----------*--------------
-
-
-        // -------------Set up for FurToken transfer --------
-        FURToken::initialize(creator);
-        FURToken::mint(signer::address_of(user1), 900000_0000_0000);
-        
-        let owner_furToken_before = primary_fungible_store::balance(signer::address_of(creator), FURToken::get_metadata());
-        debug::print(&string::utf8(b"Owner balance before FurToken mint"));
-        debug::print(&owner_furToken_before);
-
-        let balance_furToken_before = primary_fungible_store::balance(signer::address_of(user1), FURToken::get_metadata());
-        let balance_character_before = primary_fungible_store::balance(signer::address_of(user1), get_metadata(RABBIT_TOKEN_NAME));
-
-        debug::print(&string::utf8(b"Furtoken Balance before character mint"));
-        debug::print(&balance_furToken_before);
-        debug::print(&string::utf8(b"Character Balance before character mint"));
-        debug::print(&balance_character_before);
-
-        // Minting 1 token in gen 1
-        mint(user1, signer::address_of(user1), 1u64);
-
-        let owner_furToken_after = primary_fungible_store::balance(signer::address_of(creator), FURToken::get_metadata());
-        debug::print(&string::utf8(b"Owner balance after FurToken mint"));
-        debug::print(&owner_furToken_after);
-        
-        let balance_furToken_after = primary_fungible_store::balance(signer::address_of(user1), FURToken::get_metadata());
-        let balance_character_after = primary_fungible_store::balance(signer::address_of(user1), get_metadata(RABBIT_TOKEN_NAME));
-        
-        debug::print(&string::utf8(b"Furtoken Balance after character mint"));
-        debug::print(&balance_furToken_after);
-        debug::print(&string::utf8(b"Character Balance after character mint"));
-        debug::print(&balance_character_after);
-        // --------------------*------------------
-
-
-    
-        timestamp::update_global_time_for_test_secs(100);
-        debug::print(&string::utf8(b"time afterwards: "));
-        debug::print(&timestamp::now_seconds());
-
+    public fun initialize(sender: &signer) {
+        init_module(sender);
     }
 }
