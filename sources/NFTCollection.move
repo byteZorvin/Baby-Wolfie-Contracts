@@ -31,6 +31,14 @@ module owner::NFTCollection {
     const BABY_WOLFIE_SYMBOL_NAME: vector<u8> = b"BW";
 
 
+
+
+
+    const Gen0_Max: u128 = 1u128;
+    const Gen1_Max: u128 = 20u128;
+    const Gen2_Max: u128 = 40u128;
+
+
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
     /// Represents the common fields for a collection.
     struct Collection has key {
@@ -201,14 +209,14 @@ module owner::NFTCollection {
         debug::print(&string::utf8(b"token supply outside if"));
         debug::print(&token_current_supply);
 
-        if(token_current_supply < 10000u128) {
+        if(token_current_supply < Gen0_Max) {
             debug::print(&string::utf8(b"token supply inside if"));
             debug::print(&token_current_supply);
-            assert!(token_current_supply + (amount as u128) <= 10000u128, EALL_MINTED);
+            assert!(token_current_supply + 1u128 <= Gen0_Max, EALL_MINTED);
             let price = 1;
             debug::print(&price);
-            assert!(coin::balance<AptosCoin>(receiver_address) >= price, EINSUFFICIENT_APT_BALANCE);
-            coin::transfer<AptosCoin>(receiver, @owner, amount*price);
+            assert!(coin::balance<AptosCoin>(receiver) >= price, EINSUFFICIENT_APT_BALANCE);
+            coin::transfer<AptosCoin>(sender, @owner, price);
         }
         else {
             debug::print(&string::utf8(b"Supply greater than 10k"));
@@ -237,14 +245,14 @@ module owner::NFTCollection {
     }
 
     fun mint_cost(current_supply: u128): u64 {
-        if (current_supply <= 10000u128) {
+        if (current_supply < Gen0_Max) {
             return 0u64
-        } else if (current_supply <= 20000u128) {
-            return 20000u64
-        } else if (current_supply <= 40000u128) {
-            return 40000u64
+        } else if (current_supply <= Gen1_Max) {
+            return 20u64
+        } else if (current_supply <= Gen2_Max) {
+            return 40u64
         };
-        80000u64
+        80u64
     }
 
     #[view]
@@ -313,7 +321,7 @@ module owner::NFTCollection {
         coin::destroy_mint_cap(mint_cap);
         coin::destroy_freeze_cap(freeze_cap);
         coin::destroy_burn_cap(burn_cap);
-        mint(user1, user1, 9999u64);
+        mint(user1, signer::address_of(user1), 1u64);
 
         let owner_balance = coin::balance<AptosCoin>(signer::address_of(creator));
         debug::print(&string::utf8(b"Owner Balance after mint"));
@@ -326,8 +334,6 @@ module owner::NFTCollection {
         FURToken::initialize(creator);
         FURToken::mint(signer::address_of(user1), 900000_0000_0000);
         
-        // mint(user1, signer::address_of(user1), 1u64);
-
         let owner_furToken_before = primary_fungible_store::balance(signer::address_of(creator), FURToken::get_metadata());
         debug::print(&string::utf8(b"Owner balance before FurToken mint"));
         debug::print(&owner_furToken_before);
@@ -341,7 +347,7 @@ module owner::NFTCollection {
         debug::print(&balance_character_before);
 
         // Minting 1 token in gen 1
-        mint(user1, user1, 1u64);
+        mint(user1, signer::address_of(user1), 1u64);
 
         let owner_furToken_after = primary_fungible_store::balance(signer::address_of(creator), FURToken::get_metadata());
         debug::print(&string::utf8(b"Owner balance after FurToken mint"));
@@ -361,5 +367,6 @@ module owner::NFTCollection {
         timestamp::update_global_time_for_test_secs(100);
         debug::print(&string::utf8(b"time afterwards: "));
         debug::print(&timestamp::now_seconds());
+
     }
 }
