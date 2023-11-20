@@ -12,11 +12,7 @@ module owner::Stake {
     use std::timestamp;
     use owner::config;
 
-    // const RABBIT_TOKEN_NAME: vector<u8> = b"Rabbit Token";
-    // const RABBIT_SYMBOL_NAME: vector<u8> = b"RB";
-
-    // const BABY_WOLFIE_TOKEN_NAME: vector<u8> = b"Baby Wolfie Token";
-    // const BABY_WOLFIE_SYMBOL_NAME: vector<u8> = b"BW";
+    const ENOT_STAKED: u64 = 1;
     
     struct RabbitStakeInfo has store {
         staker: address,
@@ -57,9 +53,22 @@ module owner::Stake {
         table::add(&mut forest.rabbit_stake_table, signer::address_of(user), rabbit_stake_info);
     }
 
-    public fun unstake_rabbit(user: &signer, amount: u64) {
+    public fun unstake_rabbit(user: &signer, amount: u64) acquires Forest{
+        let forest = borrow_global<Forest>(@owner);
+        assert!(table::contains(&forest.rabbit_stake_table, signer::address_of(user)), ENOT_STAKED);
         primary_fungible_store::transfer(user, get_metadata(config::rabbit_token_name()), @owner, amount);
     }
 
-    
+    #[test_only]
+    public fun check_if_contains(user: &signer) acquires Forest{
+        let forest = borrow_global<Forest>(@owner);
+        assert!(table::contains(&forest.rabbit_stake_table, signer::address_of(user)), ENOT_STAKED);
+        assert!(table::contains(&forest.baby_wolfie_table, signer::address_of(user)), ENOT_STAKED);
+        
+    }
+
+    #[test_only]
+    public fun initialize(sender: &signer) {
+        init_module(sender);
+    }
 }

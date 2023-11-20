@@ -3,9 +3,11 @@ module owner::Test {
     use aptos_framework::primary_fungible_store;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
+    use aptos_std::table::{Self, Table};
     use owner::config;
     use owner::FURToken;
     use owner::NFTCollection;
+    use owner::Stake;
 
 
     #[test_only]
@@ -31,6 +33,7 @@ module owner::Test {
         NFTCollection::initialize(creator);
     }
     
+
     #[test(creator=@owner, framework=@0x1, user1=@0xcafe)] 
     fun test_mint(creator: &signer, framework: &signer, user1: &signer) {
         // Setup accounts
@@ -116,13 +119,13 @@ module owner::Test {
         debug::print(&balance_character_after);
         // --------------------*------------------
 
-
         timestamp::update_global_time_for_test_secs(100);
         debug::print(&string::utf8(b"time afterwards: "));
         debug::print(&timestamp::now_seconds());
 
         // --------------------*------------------
-        // stake_rabbit(user1, 1u64);
-        // unstake_rabbit(user1, 1u64);
+        Stake::initialize(creator);
+        Stake::stake_rabbit(user1, 1u64);
+        Stake::unstake_rabbit(user1, 1u64);
     }
 }
