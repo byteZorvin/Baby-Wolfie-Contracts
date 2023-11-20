@@ -7,8 +7,8 @@ module owner::Test {
     use owner::config;
     use owner::FURToken;
     use owner::NFTCollection;
-    use owner::Stake;
-
+    // use owner::old_stake;
+    use owner::new_stake;
 
     #[test_only]
     use aptos_framework::block;
@@ -104,7 +104,7 @@ module owner::Test {
         debug::print(&balance_character_before);
 
         // Minting 1 token in gen 1
-        NFTCollection::mint(user1, signer::address_of(user1), 1u64);
+        NFTCollection::mint(user1, signer::address_of(user1), 3u64);
 
         let owner_furToken_after = primary_fungible_store::balance(signer::address_of(creator), FURToken::get_metadata());
         debug::print(&string::utf8(b"Owner balance after FurToken mint"));
@@ -124,19 +124,19 @@ module owner::Test {
         debug::print(&timestamp::now_seconds());
 
         // --------------------*------------------
-        Stake::initialize(creator);
-        Stake::stake_rabbit(user1, 2u64);
-        // Stake::unstake_rabbit(user1, 1u64);
-        Stake::check_if_contains(user1);
+        // old_stake::initialize(creator);
+        // old_stake::stake_rabbit(user1, 2u64);
+        // old_stake::unstake_rabbit(user1, 1u64);
+        // old_stake::check_if_contains(user1);
 
-        let nft_balance_after_staking = primary_fungible_store::balance(signer::address_of(user1), NFTCollection::get_metadata(config::rabbit_token_name()));
-        debug::print(&string::utf8(b"NFT Balance after staking"));
-        debug::print(&nft_balance_after_staking);
+        // let nft_balance_after_staking = primary_fungible_store::balance(signer::address_of(user1), NFTCollection::get_metadata(config::rabbit_token_name()));
+        // debug::print(&string::utf8(b"NFT Balance after staking"));
+        // debug::print(&nft_balance_after_staking);
 
 
-        let owner_balance_after_staking = primary_fungible_store::balance(signer::address_of(creator), NFTCollection::get_metadata(config::rabbit_token_name()));
-        debug::print(&string::utf8(b"Owner Balance after staking"));
-        debug::print(&owner_balance_after_staking);
+        // let owner_balance_after_staking = primary_fungible_store::balance(signer::address_of(creator), NFTCollection::get_metadata(config::rabbit_token_name()));
+        // debug::print(&string::utf8(b"Owner Balance after staking"));
+        // debug::print(&owner_balance_after_staking);
 
         // Stake::unstake_rabbit(user1, 1u64);
 
@@ -149,5 +149,14 @@ module owner::Test {
         // debug::print(&string::utf8(b"Owner Balance after unstaking"));
         // debug::print(&owner_balance_after_unstaking);
 
+
+
+        // --------------------*------------------
+        // new_stake::initialize(creator);
+        new_stake::stake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 2);
+        new_stake::unstake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
+        new_stake::stake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 3);   // Pool address is coming different? 
+
     }
+
 }

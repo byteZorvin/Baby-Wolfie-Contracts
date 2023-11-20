@@ -1,4 +1,4 @@
-module owner::Stake {
+module owner::old_stake {
     // use aptos_framework::fungible_asset;
     use aptos_framework::primary_fungible_store;
     // use aptos_token_objects::token;
@@ -55,10 +55,10 @@ module owner::Stake {
         // debug::print(&string::utf8(b"Rabbit staked"));
     }
 
-    public fun unstake_rabbit(user: &signer, amount: u64) acquires Forest{
+    public fun unstake_rabbit(user: &signer, _amount: u64) acquires Forest{
         let forest = borrow_global<Forest>(@owner);
         assert!(table::contains(&forest.rabbit_stake_table, signer::address_of(user)), ENOT_STAKED);
-        primary_fungible_store::transfer(@owner, get_metadata(config::rabbit_token_name()), user, amount);
+        // primary_fungible_store::transfer(@owner, get_metadata(config::rabbit_token_name()), user, amount);
     }
 
     public fun check_if_contains(user: &signer) acquires Forest{

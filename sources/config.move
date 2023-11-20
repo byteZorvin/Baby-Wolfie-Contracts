@@ -1,7 +1,6 @@
 module owner::config {
     use std::string::{Self, String};
     friend owner::NFTCollection;
-    friend owner::Stake;
 
     const CHARACTER_COLLECTION_NAME: vector<u8> = b"CHARACTER Collection Name";
     const CHARACTER_COLLECTION_DESCRIPTION: vector<u8> = b"CHARACTER Collection Description";
