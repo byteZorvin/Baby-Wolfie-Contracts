@@ -164,6 +164,8 @@ module owner::new_stake {
         let staker_addr = signer::address_of(staker);
         let stake_info = borrow_global_mut<StakePoolRegistry>(staker_addr);
 
+        // FIXME: Fix return of pool address n signer when pool already exists
+
         // //If it already exists, use it, otherwise create a pool
         // if (smart_table::contains(
         //     &stake_info.fungible_asset_to_stake_pool,
