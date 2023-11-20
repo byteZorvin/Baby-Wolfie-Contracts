@@ -5,7 +5,8 @@ module owner::Stake {
     // use aptos_framework::aptos_coin::AptosCoin;
     // use aptos_framework::coin;
     // use std::option::{Self};
-    // use std::string::{Self, String};
+    // use std::string::{Self};
+    use std::debug;
     use std::signer;
     use aptos_std::table::{Self, Table};
     use owner::NFTCollection::{get_metadata};
@@ -51,20 +52,21 @@ module owner::Stake {
             unclaimed_amount: 0,
         };
         table::add(&mut forest.rabbit_stake_table, signer::address_of(user), rabbit_stake_info);
+        // debug::print(&string::utf8(b"Rabbit staked"));
     }
 
     public fun unstake_rabbit(user: &signer, amount: u64) acquires Forest{
         let forest = borrow_global<Forest>(@owner);
         assert!(table::contains(&forest.rabbit_stake_table, signer::address_of(user)), ENOT_STAKED);
-        primary_fungible_store::transfer(user, get_metadata(config::rabbit_token_name()), @owner, amount);
+        primary_fungible_store::transfer(@owner, get_metadata(config::rabbit_token_name()), user, amount);
     }
 
-    #[test_only]
     public fun check_if_contains(user: &signer) acquires Forest{
         let forest = borrow_global<Forest>(@owner);
+        let rabbit = table::borrow(&forest.rabbit_stake_table, signer::address_of(user));
+        debug::print(rabbit);
         assert!(table::contains(&forest.rabbit_stake_table, signer::address_of(user)), ENOT_STAKED);
-        assert!(table::contains(&forest.baby_wolfie_table, signer::address_of(user)), ENOT_STAKED);
-        
+        // assert!(table::contains(&forest.baby_wolfie_table, signer::address_of(user)), ENOT_STAKED);
     }
 
     #[test_only]

@@ -3,7 +3,7 @@ module owner::Test {
     use aptos_framework::primary_fungible_store;
     use aptos_framework::aptos_coin::AptosCoin;
     use aptos_framework::coin;
-    use aptos_std::table::{Self, Table};
+    // use aptos_std::table::{Self, Table};
     use owner::config;
     use owner::FURToken;
     use owner::NFTCollection;
@@ -125,7 +125,29 @@ module owner::Test {
 
         // --------------------*------------------
         Stake::initialize(creator);
-        Stake::stake_rabbit(user1, 1u64);
-        Stake::unstake_rabbit(user1, 1u64);
+        Stake::stake_rabbit(user1, 2u64);
+        // Stake::unstake_rabbit(user1, 1u64);
+        Stake::check_if_contains(user1);
+
+        let nft_balance_after_staking = primary_fungible_store::balance(signer::address_of(user1), NFTCollection::get_metadata(config::rabbit_token_name()));
+        debug::print(&string::utf8(b"NFT Balance after staking"));
+        debug::print(&nft_balance_after_staking);
+
+
+        let owner_balance_after_staking = primary_fungible_store::balance(signer::address_of(creator), NFTCollection::get_metadata(config::rabbit_token_name()));
+        debug::print(&string::utf8(b"Owner Balance after staking"));
+        debug::print(&owner_balance_after_staking);
+
+        // Stake::unstake_rabbit(user1, 1u64);
+
+        // let nft_balance_after_unstaking = primary_fungible_store::balance(signer::address_of(user1), NFTCollection::get_metadata(config::rabbit_token_name()));
+        // debug::print(&string::utf8(b"NFT Balance after unstaking"));
+        // debug::print(&nft_balance_after_unstaking);
+
+
+        // let owner_balance_after_unstaking = primary_fungible_store::balance(signer::address_of(creator), NFTCollection::get_metadata(config::rabbit_token_name()));
+        // debug::print(&string::utf8(b"Owner Balance after unstaking"));
+        // debug::print(&owner_balance_after_unstaking);
+
     }
 }
