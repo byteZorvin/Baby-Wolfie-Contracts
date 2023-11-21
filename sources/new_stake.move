@@ -57,9 +57,12 @@ module owner::new_stake {
         };
 
         // Use the existing pool if it exists or create a new one
-        let (pool_address, pool_signer)= create_or_retrieve_stake_pool_address(staker, asset_metadata_address);
+        let pool_address =  create_or_retrieve_stake_pool_address(staker, asset_metadata_address);
         debug::print(&string::utf8(b"Pool address: "));
         debug::print(&pool_address);
+    
+        let pool = borrow_global_mut<Pool>(pool_address);
+        let pool_signer = object::generate_signer_for_extending(&pool.extend_ref);
 
         if(!exists<Pool>(signer::address_of(&pool_signer))) {
             debug::print(&string::utf8(b"Pool does not exists !!"));
@@ -67,13 +70,15 @@ module owner::new_stake {
         else {
             debug::print(&string::utf8(b"Pool exists !!!"));
             let pool = borrow_global_mut<Pool>(signer::address_of(&pool_signer));
-            // Now that we have the pool address, add stake
-            primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
 
             if(get_metadata(config::rabbit_token_name()) == asset_metadata_object) {
                 pool.rabbit_staked_amount = pool.rabbit_staked_amount+amount;
                 // debug::print(&string::utf8(b"Rabbit amount after staking: "));
                 // debug::print(&pool.rabbit_staked_amount);
+
+                // Now that we have the pool address, add stake
+                primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
+
                 let staker_nft_balance_after_staking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
                 debug::print(&string::utf8(b"Staker Rabbit NFT balance after staking: "));
                 debug::print(&staker_nft_balance_after_staking);
@@ -82,10 +87,14 @@ module owner::new_stake {
                 pool.baby_wolf_staked_amount = pool.rabbit_staked_amount+amount;
                 // debug::print(&string::utf8(b"Baby Wolfie amount after staking: "));
                 // debug::print(&pool.baby_wolf_staked_amount);
+                
+                // Now that we have the pool address, add stake
+                primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
+
                 let staker_nft_balance_after_staking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
                 debug::print(&string::utf8(b"Staker Wolf NFT balance after staking: "));
                 debug::print(&staker_nft_balance_after_staking);
-            }
+            };
         };
         
     }
@@ -99,6 +108,9 @@ module owner::new_stake {
         let asset_metadata_address = object::object_address(&asset_metadata_object);
         let pool_address = retrieve_stake_pool_address(staker, asset_metadata_address);
 
+        
+        let staker_addr = signer::address_of(staker);
+
         let pool = borrow_global_mut<Pool>(pool_address);
         let pool_signer = object::generate_signer_for_extending(&pool.extend_ref);
 
@@ -108,14 +120,13 @@ module owner::new_stake {
             E_NOT_ENOUGH_FUNDS_TO_UNSTAKE
         );
 
-        // Now that we have the pool address, remove stake
-        let staker_addr = signer::address_of(staker);
-        primary_fungible_store::transfer(&pool_signer, asset_metadata_object, staker_addr, amount);
-
         if(get_metadata(config::rabbit_token_name()) == asset_metadata_object) {
             pool.rabbit_staked_amount = pool.rabbit_staked_amount-amount;
             // debug::print(&string::utf8(b"Rabbit amount after unstaking: "));
             // debug::print(&pool.rabbit_staked_amount);
+
+            // Now that we have the pool address, remove stake
+            primary_fungible_store::transfer(&pool_signer, asset_metadata_object, staker_addr, amount);
 
             let staker_nft_balance_after_unstaking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
             debug::print(&string::utf8(b"Staker Rabbit NFT balance after unstaking: "));
@@ -126,10 +137,15 @@ module owner::new_stake {
             // debug::print(&string::utf8(b"Baby Wolfie amount after unstaking: "));
             // debug::print(&pool.baby_wolf_staked_amount);
 
+            // Now that we have the pool address, remove stake
+            primary_fungible_store::transfer(&pool_signer, asset_metadata_object, staker_addr, amount);
+
             let staker_nft_balance_after_unstaking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
             debug::print(&string::utf8(b"Staker Wolf NFT balance after unstaking: "));
             debug::print(&staker_nft_balance_after_unstaking);
-        }
+        };
+
+
     }
 
     fun create_stake_registry(staker: &signer) {
@@ -145,7 +161,7 @@ module owner::new_stake {
     ): address acquires StakePoolRegistry {
         let staker_addr = signer::address_of(staker);
 
-        // // Ensure stake pool registry exists
+        // Ensure stake pool registry exists
         assert!(exists<StakePoolRegistry>(staker_addr), E_NO_STAKE_REGISTRY);
         let stake_info = borrow_global<StakePoolRegistry>(staker_addr);
 
@@ -160,73 +176,40 @@ module owner::new_stake {
     fun create_or_retrieve_stake_pool_address(
         staker: &signer,
         asset_metadata_address: address
-    ): (address, signer) acquires StakePoolRegistry {
+    ): address acquires StakePoolRegistry {
         let staker_addr = signer::address_of(staker);
         let stake_info = borrow_global_mut<StakePoolRegistry>(staker_addr);
 
-        // FIXME: Fix return of pool address n signer when pool already exists
-
-        // //If it already exists, use it, otherwise create a pool
-        // if (smart_table::contains(
-        //     &stake_info.fungible_asset_to_stake_pool,
-        //     asset_metadata_address
-        // )) {
-        //    *smart_table::borrow(&stake_info.fungible_asset_to_stake_pool, asset_metadata_address)
-        // } else {
-        //     // Create the pool
-        //     let pool_constructor: ConstructorRef = object::create_object_from_account(staker);
-        //     let pool_signer = object::generate_signer(&pool_constructor);
-        //     let extend_ref = object::generate_extend_ref(&pool_constructor);
-        //     let delete_ref = object::generate_delete_ref(&pool_constructor);
-
-        //     let pool_address = object::address_from_constructor_ref(&pool_constructor);
-        //     let pool = Pool {
-        //         extend_ref,
-        //         delete_ref,
-        //         rabbit_staked_amount: 0u64, 
-        //         baby_wolf_staked_amount: 0u64,
-        //     };
-
-        //     smart_table::add(
-        //         &mut stake_info.fungible_asset_to_stake_pool,
-        //         asset_metadata_address,
-        //         pool_address
-        //     );
-
-        //     move_to<Pool>(&pool_signer, pool);
-        //     if(!exists<Pool>(signer::address_of(&pool_signer))) {
-        //         debug::print(&string::utf8(b"Pool does not exists !!"));
-        //     };
-        //     (pool_address, pool_signer)
-        // }
-        let pool_constructor: ConstructorRef = object::create_object_from_account(staker);
-        let pool_signer = object::generate_signer(&pool_constructor);
-        let extend_ref = object::generate_extend_ref(&pool_constructor);
-        let delete_ref = object::generate_delete_ref(&pool_constructor);
-
-        let pool_address = object::address_from_constructor_ref(&pool_constructor);
-        let pool = Pool {
-            extend_ref,
-            delete_ref,
-            rabbit_staked_amount: 0u64, 
-            baby_wolf_staked_amount: 0u64,
-        };
         if(smart_table::contains(
             &stake_info.fungible_asset_to_stake_pool,
             asset_metadata_address
         )) {
-            debug::print(&string::utf8(b"Pool already exists (inside) !!"));
-        }else {
+            *smart_table::borrow(&stake_info.fungible_asset_to_stake_pool, asset_metadata_address)
+            // debug::print(&string::utf8(b"Pool already exists (inside) !!"));
+        } else {
+
+            let pool_constructor: ConstructorRef = object::create_object_from_account(staker);
+            let pool_signer = object::generate_signer(&pool_constructor);
+            let extend_ref = object::generate_extend_ref(&pool_constructor);
+            let delete_ref = object::generate_delete_ref(&pool_constructor);
+
+            let pool_address = object::address_from_constructor_ref(&pool_constructor);
+            let pool = Pool {
+                extend_ref,
+                delete_ref,
+                rabbit_staked_amount: 0u64, 
+                baby_wolf_staked_amount: 0u64,
+            };
             smart_table::add(
                 &mut stake_info.fungible_asset_to_stake_pool,
                 asset_metadata_address,
                 pool_address
-            )
-        };
-        move_to<Pool>(&pool_signer, pool);
-        // let table_info = *smart_table::borrow(&stake_info.fungible_asset_to_stake_pool, asset_metadata_address);
-        // debug::print(&string::utf8(b"Table info: "));
-        // debug::print(&table_info);
-        (pool_address, pool_signer)
+            );
+            move_to<Pool>(&pool_signer, pool);
+            // let table_info = *smart_table::borrow(&stake_info.fungible_asset_to_stake_pool, asset_metadata_address);
+            // debug::print(&string::utf8(b"Table info: "));
+            // debug::print(&table_info);
+            pool_address
+        }
     }
 }
