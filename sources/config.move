@@ -12,7 +12,7 @@ module owner::config {
     const BABY_WOLFIE_TOKEN_NAME: vector<u8> = b"Baby Wolfie Token";
     const BABY_WOLFIE_SYMBOL_NAME: vector<u8> = b"BW";
 
-    const Gen0_Max: u128 = 1u128;
+    const Gen0_Max: u128 = 2u128;
     const Gen1_Max: u128 = 20u128;
     const Gen2_Max: u128 = 40u128;
 
