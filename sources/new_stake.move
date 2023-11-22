@@ -3,11 +3,13 @@ module owner::new_stake {
     use std::signer;
     use aptos_std::smart_table;
     use aptos_framework::object;
+    use aptos_framework::timestamp;
     use aptos_framework::object::{ConstructorRef, ExtendRef, DeleteRef, Object};
     use aptos_framework::primary_fungible_store;
     use std::string::{Self};
     use std::debug;
     use owner::config;
+
     use owner::NFTCollection::{ get_metadata, Character };
 
     struct StakePoolRegistry has key {                      
@@ -19,8 +21,12 @@ module owner::new_stake {
     struct Pool has key {
         extend_ref: ExtendRef,
         delete_ref: DeleteRef,
+
         rabbit_staked_amount: u64,
         baby_wolf_staked_amount: u64,
+
+        unclaimed_rabbit_earnings: u64,
+        last_update: u64,
     }
 
     /// Staking not initialized for this account
@@ -33,6 +39,12 @@ module owner::new_stake {
     const E_NOT_ENOUGH_FUNDS_TO_STAKE: u64 = 3;
     /// Not enough funds in the pool to unstake the amount given
     const E_NOT_ENOUGH_FUNDS_TO_UNSTAKE: u64 = 4;
+
+    // #[view]
+    // Returns the amount of a particular asset that is staked by the given address
+    // fun get_staked_amount(_staker: address) {
+    // TODO
+    // }
 
     /// Adds stake to a pool
     public entry fun stake(
@@ -64,39 +76,49 @@ module owner::new_stake {
         let pool = borrow_global_mut<Pool>(pool_address);
         let pool_signer = object::generate_signer_for_extending(&pool.extend_ref);
 
-        if(!exists<Pool>(signer::address_of(&pool_signer))) {
-            debug::print(&string::utf8(b"Pool does not exists !!"));
+        update_earnings(pool_address);
+
+        let pool = borrow_global_mut<Pool>(signer::address_of(&pool_signer));
+        if(get_metadata(config::rabbit_token_name()) == asset_metadata_object) {
+            pool.rabbit_staked_amount = pool.rabbit_staked_amount+amount;
+            // debug::print(&string::utf8(b"Rabbit amount after staking: "));
+            // debug::print(&pool.rabbit_staked_amount);
+
+            // Now that we have the pool address, add stake
+            primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
+
+            let staker_nft_balance_after_staking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
+            debug::print(&string::utf8(b"Staker Rabbit NFT balance after staking: "));
+            debug::print(&staker_nft_balance_after_staking);
         }
-        else {
-            debug::print(&string::utf8(b"Pool exists !!!"));
-            let pool = borrow_global_mut<Pool>(signer::address_of(&pool_signer));
+        else if (get_metadata(config::baby_wolfie_token_name()) == asset_metadata_object) {
+            pool.baby_wolf_staked_amount = pool.rabbit_staked_amount+amount;
+            // debug::print(&string::utf8(b"Baby Wolfie amount after staking: "));
+            // debug::print(&pool.baby_wolf_staked_amount);
+            
+            // Now that we have the pool address, add stake
+            primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
 
-            if(get_metadata(config::rabbit_token_name()) == asset_metadata_object) {
-                pool.rabbit_staked_amount = pool.rabbit_staked_amount+amount;
-                // debug::print(&string::utf8(b"Rabbit amount after staking: "));
-                // debug::print(&pool.rabbit_staked_amount);
-
-                // Now that we have the pool address, add stake
-                primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
-
-                let staker_nft_balance_after_staking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
-                debug::print(&string::utf8(b"Staker Rabbit NFT balance after staking: "));
-                debug::print(&staker_nft_balance_after_staking);
-            }
-            else if (get_metadata(config::baby_wolfie_token_name()) == asset_metadata_object) {
-                pool.baby_wolf_staked_amount = pool.rabbit_staked_amount+amount;
-                // debug::print(&string::utf8(b"Baby Wolfie amount after staking: "));
-                // debug::print(&pool.baby_wolf_staked_amount);
-                
-                // Now that we have the pool address, add stake
-                primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
-
-                let staker_nft_balance_after_staking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
-                debug::print(&string::utf8(b"Staker Wolf NFT balance after staking: "));
-                debug::print(&staker_nft_balance_after_staking);
-            };
+            let staker_nft_balance_after_staking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
+            debug::print(&string::utf8(b"Staker Wolf NFT balance after staking: "));
+            debug::print(&staker_nft_balance_after_staking);
         };
-        
+    }
+
+    // fun claim_Fur_earnings(staker: &signer, amount: u64) acquires Pool {
+    //     let staker_addr = signer::address_of(staker);
+    // }
+
+    fun update_earnings(pool_address: address) acquires Pool {
+        let pool = borrow_global_mut<Pool>(pool_address);
+        let pool_signer = object::generate_signer_for_extending(&pool.extend_ref);
+        let pool = borrow_global_mut<Pool>(signer::address_of(&pool_signer));
+
+        let time_elapsed = timestamp::now_seconds() - pool.last_update;
+        let rabbit_earnings = (pool.rabbit_staked_amount * config::daily_earning_rate() * time_elapsed) / 86400u64;
+    
+        pool.unclaimed_rabbit_earnings = pool.unclaimed_rabbit_earnings + rabbit_earnings;
+        pool.last_update = timestamp::now_seconds();
     }
 
     /// Removes stake from the pool
@@ -197,8 +219,12 @@ module owner::new_stake {
             let pool = Pool {
                 extend_ref,
                 delete_ref,
+                
                 rabbit_staked_amount: 0u64, 
                 baby_wolf_staked_amount: 0u64,
+
+                unclaimed_rabbit_earnings: 0u64,
+                last_update: timestamp::now_seconds(),
             };
             smart_table::add(
                 &mut stake_info.fungible_asset_to_stake_pool,

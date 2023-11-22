@@ -16,6 +16,8 @@ module owner::config {
     const Gen1_Max: u128 = 20u128;
     const Gen2_Max: u128 = 40u128;
 
+    const DAILY_EARNING_RATE: u64 = 1;
+
     public fun collection_name(): String {
         string::utf8(CHARACTER_COLLECTION_NAME)
     }
@@ -54,6 +56,10 @@ module owner::config {
 
     public fun gen2_max(): u128 {
         Gen2_Max
+    }
+
+    public fun daily_earning_rate(): u64 {
+        DAILY_EARNING_RATE
     }
 
 }

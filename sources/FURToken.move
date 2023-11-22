@@ -2,10 +2,13 @@ module owner::FURToken {
 
     use std::option;
     use std::string::{Self};
-
     use aptos_framework::fungible_asset::{Self, MintRef, TransferRef, BurnRef, Metadata};
     use aptos_framework::object::{Self, Object};
     use aptos_framework::primary_fungible_store;
+    friend owner::new_stake;
+    friend owner::NFTCollection;
+    #[test_only]
+    friend owner::Test;
 
     #[test_only]
     use aptos_framework::account;
@@ -54,7 +57,8 @@ module owner::FURToken {
         object::address_to_object<Metadata>(asset_address)
     }
 
-    public entry fun mint(to: address, amount: u64) acquires FurToken{
+
+    public entry fun mint(to: address, amount: u64) acquires FurToken {
         let metadata = get_metadata();
         let refs = borrow_global<FurToken>(object::object_address(&metadata));
         let primary_store = primary_fungible_store::ensure_primary_store_exists(to, fungible_asset::mint_ref_metadata(&refs.mint_ref));
