@@ -23,10 +23,10 @@ module owner::FURToken {
     const ASSET_NAME: vector<u8> = b"FUR Token";
     const ASSET_SYMBOL: vector<u8> = b"FUR";
 
-    public fun initialize(
+    fun init_module(
         account: &signer
     ) {
-        let constructor_ref = &object::create_named_object(account, b"FUR");
+        let constructor_ref = &object::create_named_object(account, b"FUR");  
         primary_fungible_store::create_primary_store_enabled_fungible_asset(
             constructor_ref,
             option::none(),
@@ -73,7 +73,7 @@ module owner::FURToken {
     }
 
 
-    public entry fun transfer(
+    fun transfer(  // can not be called externally
         from: address,      // Why not signer here ??
         to: address,
         amount: u64
@@ -110,7 +110,7 @@ module owner::FURToken {
         let alice = account::create_account_for_test(@0xA);
         let bob = account::create_account_for_test(@0xB);
 
-        initialize(creator);
+        init_module(creator);
         let metadata = get_metadata();
         // debug::print(&metadata);
         mint(signer::address_of(&alice), 100);
@@ -142,5 +142,10 @@ module owner::FURToken {
         // assert!(fungible_asset::amount(&fa) == 10000, 0);
 
         // fungible_asset::burn(&furToken.burn_ref, fa);
+    }
+
+    #[test_only]
+    public fun initialize(sender: &signer) {
+        init_module(sender);
     }
 }

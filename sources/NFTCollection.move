@@ -248,4 +248,5 @@ module owner::NFTCollection {
     public fun initialize(sender: &signer) {
         init_module(sender);
     }
+
 }

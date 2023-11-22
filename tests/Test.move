@@ -32,6 +32,14 @@ module owner::Test {
     public fun init_module_for_test(creator: &signer) {
         NFTCollection::initialize(creator);
     }
+
+    public fun init_module_for_test_fur(creator: &signer) {
+        FURToken::initialize(creator);
+    }
+
+    public fun init_module_for_test_stake(creator: &signer) {
+        new_stake::initialize(creator);
+    }
     
 
     #[test(creator=@owner, framework=@0x1, user1=@0xcafe, user2=@0x789)] 
@@ -107,7 +115,7 @@ module owner::Test {
 
 
         // 5. ---------------- Setup and Mint FurToken to users --------
-        FURToken::initialize(creator);
+        init_module_for_test_fur(creator);
         FURToken::mint(signer::address_of(user1), 100000_0000_0000);
         FURToken::mint(signer::address_of(user2), 100000_0000_0000);
         
@@ -148,6 +156,9 @@ module owner::Test {
         // --------------------*------------------
 
         // 6 --------------- Staking module ------------------
+
+        init_module_for_test_stake(creator);
+
         
         debug::print(&string::utf8(b"User1 stakes"));
         new_stake::stake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 2);
@@ -158,6 +169,8 @@ module owner::Test {
         debug::print(&string::utf8(b"User2 unstakes"));
         new_stake::unstake(user2, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
         new_stake::stake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 3);   
+
+        // ----------------------------------------------
     }
 
 }
