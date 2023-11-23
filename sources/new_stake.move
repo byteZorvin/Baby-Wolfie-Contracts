@@ -168,6 +168,8 @@ module owner::new_stake {
         let rabbit_earnings = (pool.rabbit_staked_amount * config::daily_earning_rate() * time_elapsed) / 86400u64;
     
         pool.unclaimed_rabbit_earnings = pool.unclaimed_rabbit_earnings + rabbit_earnings;
+        debug::print(&string::utf8(b"Unclaimed Rabbit Earning"));
+        debug::print(&pool.unclaimed_rabbit_earnings);
         pool.last_update = timestamp::now_seconds();
     }
 
@@ -176,7 +178,8 @@ module owner::new_stake {
         debug::print(&string::utf8(b"inside rabbit claim fun"));
         let pool = borrow_global_mut<Pool>(pool_address);
         let tax_pool_addr = object::create_object_address(&@owner, b"TaxPool");
-
+        debug::print(&string::utf8(b"Unclaimed Rabbit Earning to be claimed"));
+        debug::print(&pool.unclaimed_rabbit_earnings);
         let tax_share = pool.unclaimed_rabbit_earnings * config::rabbit_tax_rate() / 100u64;
         debug::print(&string::utf8(b"Tax Share"));
         debug::print(&tax_share);
@@ -185,7 +188,7 @@ module owner::new_stake {
         };
         if(pool.unclaimed_rabbit_earnings > 0) {
             FURToken::mint(staker_addr, pool.unclaimed_rabbit_earnings - tax_share);
-            FURToken::mint(tax_pool_addr, pool.unclaimed_rabbit_earnings - tax_share);
+            FURToken::mint(tax_pool_addr, tax_share);
         };        
         pool.unclaimed_rabbit_earnings = 0;
         pool.last_update = timestamp::now_seconds();

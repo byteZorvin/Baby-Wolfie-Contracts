@@ -19,7 +19,7 @@ module owner::config {
     const Gen2_Max: u128 = 40u128;
     const Gen0_Mint_Price: u64 = 1u64;
 
-    const DAILY_EARNING_RATE: u64 = 1;
+    const DAILY_EARNING_RATE: u64 = 1000000; // 0.01 furtoken per day
 
     public fun rabbit_probability(): u64 {
         RABBIT_PROBABILITY
