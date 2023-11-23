@@ -92,9 +92,9 @@ module owner::new_stake {
         asset_metadata_object: Object<Character>,
         amount: u64
     ) acquires StakePoolRegistry, Pool, TaxPool {
-
+        
         let staker_addr = signer::address_of(staker);
-
+        
         // Ensure you can actually stake this amount
         assert!(
             primary_fungible_store::balance(staker_addr, asset_metadata_object) >= amount,
@@ -143,7 +143,9 @@ module owner::new_stake {
             let (num, deno) = get_exchange_rate();
             let fur_amount = amount*num/deno;
 
-            primary_fungible_store::transfer(staker, FURToken::get_metadata(), tax_pool_address, fur_amount);
+            if(fur_amount > 0) {
+                primary_fungible_store::transfer(staker, FURToken::get_metadata(), tax_pool_address, fur_amount);
+            };
             primary_fungible_store::transfer(staker, asset_metadata_object, pool_address, amount);
             update_exchange_rate(amount, fur_amount);
 
@@ -170,12 +172,14 @@ module owner::new_stake {
     }
 
 
-    public fun claim_rabbit_fur_earnings(pool_address: &address, staker_addr: address, all_stolen: bool) acquires Pool {
-        let pool = borrow_global_mut<Pool>(*pool_address);
+    public entry fun claim_rabbit_fur_earnings(pool_address: address, staker_addr: address, all_stolen: bool) acquires Pool {
+        debug::print(&string::utf8(b"inside rabbit claim fun"));
+        let pool = borrow_global_mut<Pool>(pool_address);
         let tax_pool_addr = object::create_object_address(&@owner, b"TaxPool");
 
-        let tax_share;
-        tax_share = pool.unclaimed_rabbit_earnings * config::rabbit_tax_rate() / 100u64;
+        let tax_share = pool.unclaimed_rabbit_earnings * config::rabbit_tax_rate() / 100u64;
+        debug::print(&string::utf8(b"Tax Share"));
+        debug::print(&tax_share);
         if(all_stolen == true) {
             tax_share = pool.unclaimed_rabbit_earnings;
         };
@@ -187,7 +191,7 @@ module owner::new_stake {
         pool.last_update = timestamp::now_seconds();
     }
 
-    fun disburse_wolf_tax_earnigns(_staker: &signer, _amount: u64) acquires TaxPool {
+    fun disburse_wolf_tax_earnings(_staker: &signer, _amount: u64) acquires TaxPool {
         let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"TaxPool")); 
         let _tax_pool_signer = object::generate_signer_for_extending(&tax_pool.extend_ref);  
 
@@ -229,16 +233,18 @@ module owner::new_stake {
             debug::print(&staker_nft_balance_after_unstaking);
             
             let random_number = random::rand_u64_range_no_sender(0, 2);
+            debug::print(&string::utf8(b"Random number: "));
+            debug::print(&random_number);
             if(random_number == 0) {
-                claim_rabbit_fur_earnings(&pool_address, staker_addr, true);
+                claim_rabbit_fur_earnings(pool_address, staker_addr, true);
             }
             else {
-                claim_rabbit_fur_earnings(&pool_address, staker_addr, false);
+                claim_rabbit_fur_earnings(pool_address, staker_addr, false);
             }
             // Transfer the owner with its fur earnings
         }
         else if (get_metadata(config::baby_wolfie_token_name()) == asset_metadata_object) {
-            pool.baby_wolf_staked_amount = pool.rabbit_staked_amount-amount;
+            pool.baby_wolf_staked_amount = pool.baby_wolf_staked_amount - amount;
             // debug::print(&string::utf8(b"Baby Wolfie amount in the pool after unstaking: "));
             // debug::print(&pool.baby_wolf_staked_amount);
 
@@ -259,7 +265,8 @@ module owner::new_stake {
         move_to<StakePoolRegistry>(staker, stake_pool_registry);
     }
     
-    fun retrieve_stake_pool_address(
+    #[view]
+    public fun retrieve_stake_pool_address(
         staker: &signer,
         asset_metadata_address: address
     ): address acquires StakePoolRegistry {

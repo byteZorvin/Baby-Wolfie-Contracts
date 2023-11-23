@@ -17,6 +17,7 @@ module owner::config {
     const Gen0_Max: u128 = 2u128;
     const Gen1_Max: u128 = 20u128;
     const Gen2_Max: u128 = 40u128;
+    const Gen0_Mint_Price: u64 = 1u64;
 
     const DAILY_EARNING_RATE: u64 = 1;
 
@@ -50,6 +51,10 @@ module owner::config {
 
     public fun baby_wolfie_symbol_name(): String {
         string::utf8(BABY_WOLFIE_SYMBOL_NAME)
+    }
+
+    public fun gen0_mint_price(): u64 {
+        Gen0_Mint_Price
     }
 
     public fun gen0_max(): u128 {

@@ -196,8 +196,8 @@ module owner::NFTCollection {
             assert!(token_current_supply + 1u128 <= config::gen0_max(), EALL_MINTED);
             let price = 1;
             debug::print(&price);
-            assert!(coin::balance<AptosCoin>(receiver) >= price, EINSUFFICIENT_APT_BALANCE);
-            coin::transfer<AptosCoin>(sender, @owner, price);
+            assert!(coin::balance<AptosCoin>(receiver) >= config::gen0_mint_price(), EINSUFFICIENT_APT_BALANCE);
+            coin::transfer<AptosCoin>(sender, @owner, config::gen0_mint_price());
         }
         else {
             debug::print(&string::utf8(b"Supply greater than 10k"));
@@ -225,7 +225,8 @@ module owner::NFTCollection {
         
     }
 
-    fun mint_cost(current_supply: u128): u64 {
+    #[view]
+    public fun mint_cost(current_supply: u128): u64 {
         if (current_supply < config::gen0_max()) {
             return 0u64
         } else if (current_supply <= config::gen1_max()) {
