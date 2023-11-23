@@ -28,6 +28,9 @@ module owner::Test {
     #[test_only]
     use std::signer;
 
+    #[test_only]
+    use std::error;
+
     
     public fun init_module_for_test(creator: &signer) {
         NFTCollection::initialize(creator);
@@ -88,6 +91,8 @@ module owner::Test {
         coin::transfer<AptosCoin>(user1, user2_addr, 500);
 
         let balance = coin::balance<AptosCoin>(signer::address_of(user1));
+        assert!(balance == 1000, error::invalid_state(1));
+
         debug::print(&string::utf8(b"Balance after AptosCoin Deposit"));
         debug::print(&balance);
 
@@ -149,9 +154,16 @@ module owner::Test {
         debug::print(&balance_character_after);
         // --------------------*------------------
 
-        timestamp::update_global_time_for_test_secs(100);
-        debug::print(&string::utf8(b"time afterwards: "));
-        debug::print(&timestamp::now_seconds());
+        // timestamp::update_global_time_for_test_secs(100);
+        // debug::print(&string::utf8(b"time before fastforward: "));
+        // debug::print(&timestamp::now_seconds());
+
+        // timestamp::fast_forward_seconds(100);
+        // debug::print(&string::utf8(b"time after fastforward: "));
+        // debug::print(&timestamp::now_seconds());
+
+        // debug::print(&string::utf8(b"Mint after forwarding time"));
+        // NFTCollection::mint(user2, signer::address_of(user2), 1u64);
 
         // --------------------*------------------
 

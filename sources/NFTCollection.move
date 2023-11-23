@@ -160,14 +160,14 @@ module owner::NFTCollection {
         token::create_token_address(&@owner, &config::collection_name(), &config::baby_wolfie_token_name())
     }
     
-    const RABBIT_PROBABILITY: u64 = 90;
+    
     public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character {
         let i = 1;
         while (i <= amount) {
             
-            let random_number = random::rand_u64_range_no_sender(0, 100);
-            let is_sheep = random_number <= RABBIT_PROBABILITY;
-            debug::print(&string::utf8(b"Random number generate: "));
+            let random_number = random::rand_u64_range_no_sender(0, 101);
+            let is_sheep = random_number <= config::rabbit_probability();
+            debug::print(&string::utf8(b"Random number generated in NFTCollection::mint() is: "));
             debug::print(&random_number);
             if(is_sheep) {
                 let rabbit_token: Object<Character> = object::address_to_object<Character>(rabbit_token_address());
@@ -188,11 +188,10 @@ module owner::NFTCollection {
         
         //Total token supply 
         let token_current_supply = option::destroy_some<u128>(fungible_asset::supply(token));
-        debug::print(&string::utf8(b"token supply outside if"));
-        debug::print(&token_current_supply);
+
 
         if(token_current_supply < config::gen0_max()) {
-            debug::print(&string::utf8(b"token supply inside if"));
+            debug::print(&string::utf8(b"token supply less than gen0_max"));
             debug::print(&token_current_supply);
             assert!(token_current_supply + 1u128 <= config::gen0_max(), EALL_MINTED);
             let price = 1;

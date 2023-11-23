@@ -58,7 +58,7 @@ module owner::FURToken {
     }
 
 
-    public entry fun mint(to: address, amount: u64) acquires FurToken {
+    public(friend) entry fun mint(to: address, amount: u64) acquires FurToken {
         let metadata = get_metadata();
         let refs = borrow_global<FurToken>(object::object_address(&metadata));
         let primary_store = primary_fungible_store::ensure_primary_store_exists(to, fungible_asset::mint_ref_metadata(&refs.mint_ref));

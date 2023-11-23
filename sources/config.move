@@ -12,11 +12,17 @@ module owner::config {
     const BABY_WOLFIE_TOKEN_NAME: vector<u8> = b"Baby Wolfie Token";
     const BABY_WOLFIE_SYMBOL_NAME: vector<u8> = b"BW";
 
+    const RABBIT_PROBABILITY: u64 = 50;
+
     const Gen0_Max: u128 = 2u128;
     const Gen1_Max: u128 = 20u128;
     const Gen2_Max: u128 = 40u128;
 
     const DAILY_EARNING_RATE: u64 = 1;
+
+    public fun rabbit_probability(): u64 {
+        RABBIT_PROBABILITY
+    }
 
     public fun collection_name(): String {
         string::utf8(CHARACTER_COLLECTION_NAME)
@@ -60,6 +66,10 @@ module owner::config {
 
     public fun daily_earning_rate(): u64 {
         DAILY_EARNING_RATE
+    }
+
+    public fun rabbit_tax_rate(): u64 {
+        20
     }
 
 }
