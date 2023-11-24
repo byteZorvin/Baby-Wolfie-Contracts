@@ -2,12 +2,14 @@ module owner::NFTCollection {
     use aptos_framework::fungible_asset;
     use aptos_framework::object::{Self, Object};
     use aptos_framework::primary_fungible_store;
+    use aptos_framework::event;
     use aptos_token_objects::collection;
     use aptos_token_objects::property_map;
     use aptos_token_objects::token;
     use aptos_framework::aptos_coin::AptosCoin;
     use std::math64::{pow};
     use aptos_framework::coin;
+    use aptos_framework::account;
     use std::option::{Self, Option};
     use std::string::{Self, String};
     use std::debug;
@@ -21,22 +23,14 @@ module owner::NFTCollection {
     const EALL_MINTED: u64 = 1;
     const EINSUFFICIENT_APT_BALANCE: u64 = 2;
 
-    #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
-    /// Represents the common fields for a collection.
-    struct Collection has key {
-        /// The creator of this collection.
-        // creator: {address},
-        // A brief description of the collection.
-        // description: String,
-        //  An optional categorization of similar token.
-        // name: String,
-        // The Uniform Resource Identifier (uri) pointing to the JSON file stored in off-chain
-        // storage; the URL length will likely need a maximum any suggestions?
-        // uri: String,
+    struct AssetMintingEvent has drop, store {
+        receiver: address,
+        asset_minted: address,
+    } 
 
-        mutator_ref: collection::MutatorRef,
+    struct Events has key {
+        asset_minting_events: event::EventHandle<AssetMintingEvent>,
     }
-
 
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
     struct Character has key {
@@ -71,7 +65,10 @@ module owner::NFTCollection {
             config::baby_wolfie_symbol_name(),
             string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
             string::utf8(b"https://www.aptoslabs.com"),
-        ) 
+        );
+        move_to(sender, Events {
+            asset_minting_events: account::new_event_handle<AssetMintingEvent>(sender),
+        });
     }
 
     fun create_character_collection(creator: &signer) {
@@ -82,7 +79,7 @@ module owner::NFTCollection {
         let maxSupply = 2;    // No of different tokens
 
         // Creates the collection with fixed supply
-        let constructor_ref = collection::create_fixed_collection(
+        collection::create_fixed_collection(
             creator,
             description,
             maxSupply,
@@ -90,13 +87,6 @@ module owner::NFTCollection {
             option::none(),
             uri,
         );
-
-        let object_signer = object::generate_signer(&constructor_ref);
-        let collection = Collection {
-            mutator_ref : collection::generate_mutator_ref(&constructor_ref)
-        };
-
-        move_to(&object_signer, collection)
     }
 
     fun create_chracter_token_as_fungible_token(
@@ -161,7 +151,7 @@ module owner::NFTCollection {
     }
     
     
-    public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character {
+    public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character, Events {
         let i = 1;
         while (i <= amount) {
             
@@ -182,7 +172,7 @@ module owner::NFTCollection {
     }
 
 
-    fun mint_internal(sender: &signer, token: Object<Character>, receiver: address) acquires Character {
+    fun mint_internal(sender: &signer, token: Object<Character>, receiver: address) acquires Character, Events {
         let token_address = object::object_address(&token);
         let character_token = borrow_global<Character>(token_address);
         
@@ -214,14 +204,19 @@ module owner::NFTCollection {
             debug::print(&string::utf8(b"decimal offset"));
             debug::print(&decimal_offset);
             let amount_with_decimals = price*decimal_offset;
-            debug::print(&string::utf8(b"Metadata"));
-            debug::print(&asset);
 
             primary_fungible_store::transfer(sender, asset, @owner, amount_with_decimals); 
         };
 
         let fa = fungible_asset::mint(&character_token.fungible_asset_mint_ref, 1);
         primary_fungible_store::deposit(receiver, fa);
+        event::emit_event<AssetMintingEvent>(
+            &mut borrow_global_mut<Events>(@owner).asset_minting_events, 
+            AssetMintingEvent {
+                receiver,
+                asset_minted: token_address, 
+            },
+        );
         
     }
 

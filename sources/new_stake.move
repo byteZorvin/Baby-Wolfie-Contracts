@@ -8,6 +8,7 @@ module owner::new_stake {
     use aptos_framework::primary_fungible_store;
     use std::string::{Self};
     use std::debug;
+    use std::vector;
     use owner::config;
     use owner::random;
     use owner::NFTCollection::{ get_metadata, Character };
@@ -17,6 +18,10 @@ module owner::new_stake {
         fungible_asset_to_stake_pool: smart_table::SmartTable<address, address>
     }
 
+    struct WolfStakerRegistry has key {
+        wolf_staker_addresses: vector<address>,
+        wolf_staker_indices: smart_table::SmartTable<address, u64>
+    }
     /// Any pool metadata that's associated here
     /// This is not necessary if you want to use a bare secondary fungible store
     struct Pool has key {
@@ -30,9 +35,9 @@ module owner::new_stake {
         last_update: u64,
     }
 
+
     struct TaxPool has key {
         extend_ref: ExtendRef,
-        // delete_ref: DeleteRef,
         total_asset: u64,
         total_shares: u64
     }
@@ -51,23 +56,26 @@ module owner::new_stake {
     
 
     fun init_module(owner: &signer) {
-        let owner_constructor : ConstructorRef = object::create_named_object(owner, b"TaxPool");
+        let owner_constructor : ConstructorRef = object::create_named_object(owner, b"staking_module");
         let owner_signer = object::generate_signer(&owner_constructor);
         let extend_ref = object::generate_extend_ref(&owner_constructor);
-        // let delete_ref = object::generate_delete_ref(&owner_constructor);
         let tax_pool_info = TaxPool {
             extend_ref,
-            // delete_ref,
             total_asset: 0,
             total_shares: 0
         };
+        let wolf_staker_registry = WolfStakerRegistry {
+            wolf_staker_addresses: vector::empty<address>(),
+            wolf_staker_indices: smart_table::new()
+        };
+        move_to(&owner_signer, wolf_staker_registry);
         move_to(&owner_signer, tax_pool_info);
     }
 
     #[view]
     // Convert shares(rabbit amount) to equivalent furtoken
     fun get_exchange_rate(): (u64, u64) acquires TaxPool {
-        let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"TaxPool"));
+        let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"staking_module"));
         let numerator = tax_pool.total_asset;
         let denominator = tax_pool.total_shares;
         if(denominator == 0) {
@@ -79,7 +87,7 @@ module owner::new_stake {
     }
 
     fun update_exchange_rate(amount: u64, fur_amount: u64): bool  acquires TaxPool {
-        let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"TaxPool"));
+        let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"staking_module"));
         tax_pool.total_asset = tax_pool.total_asset + fur_amount;
         tax_pool.total_shares = tax_pool.total_shares + amount;
         return true
@@ -91,7 +99,7 @@ module owner::new_stake {
         staker: &signer,
         asset_metadata_object: Object<Character>,
         amount: u64
-    ) acquires StakePoolRegistry, Pool, TaxPool {
+    ) acquires StakePoolRegistry, Pool, TaxPool, WolfStakerRegistry {
         
         let staker_addr = signer::address_of(staker);
         
@@ -117,7 +125,7 @@ module owner::new_stake {
         let pool = borrow_global_mut<Pool>(pool_address);
         let pool_signer = object::generate_signer_for_extending(&pool.extend_ref);
 
-        let tax_pool_address = object::create_object_address(&@owner, b"TaxPool");
+        let tax_pool_address = object::create_object_address(&@owner, b"staking_module");
 
         update_earnings(&pool_address);  
 
@@ -152,11 +160,51 @@ module owner::new_stake {
             let staker_nft_balance_after_staking = primary_fungible_store::balance(staker_addr, asset_metadata_object);
             debug::print(&string::utf8(b"Staker Wolf NFT balance after staking: "));
             debug::print(&staker_nft_balance_after_staking);
+
+            push_staker(staker_addr);
         };
     }
 
+    fun push_staker(staker: address) acquires WolfStakerRegistry {
+        let wolf_staker_registry_address = object::create_object_address(&@owner, b"staking_module");
+        let wolf_staker_registry = borrow_global_mut<WolfStakerRegistry>(wolf_staker_registry_address);
+        if(!smart_table::contains(&wolf_staker_registry.wolf_staker_indices, staker)) {
+            vector::push_back(&mut wolf_staker_registry.wolf_staker_addresses, staker);
+            smart_table::add(&mut wolf_staker_registry.wolf_staker_indices, staker, vector::length(&wolf_staker_registry.wolf_staker_addresses));
+        }
+    }
+
+    // fun pop_staker() acquires WolfStakerRegistry 
+
+    #[view]
+    public fun get_staking_balance(staker: address): (u64, u64) acquires Pool, StakePoolRegistry{
+        let rabbit_asset_metadata_object = get_metadata(config::rabbit_token_name());
+        let wolfie_asset_metadata_object = get_metadata(config::baby_wolfie_token_name());
+        
+        let rabbit_metadata_address = object::object_address(&rabbit_asset_metadata_object);
+        let wolfie_metadata_address = object::object_address(&wolfie_asset_metadata_object);
+        
+
+        let rabbit_pool_address = retrieve_stake_pool_address(staker, rabbit_metadata_address);
+        let wolfie_pool_address = retrieve_stake_pool_address(staker, wolfie_metadata_address);
+        
+        assert!(wolfie_pool_address == rabbit_pool_address, 987987);
+        
+        debug::print(&string::utf8(b"Pool address(rabbit): "));
+        debug::print(&rabbit_pool_address);
+        debug::print(&string::utf8(b"Pool address(wolfie): "));
+        debug::print(&wolfie_pool_address);
+
+
+        let pool = borrow_global_mut<Pool>(rabbit_pool_address);
+        (pool.rabbit_staked_amount, pool.baby_wolf_staked_amount)
+    }
+
+
+
     // fun claim_Fur_earnings(staker: &signer, amount: u64) acquires Pool {
     //     let staker_addr = signer::address_of(staker);
+    
     // }
 
     fun update_earnings(pool_address: &address) acquires Pool {
@@ -177,7 +225,7 @@ module owner::new_stake {
     public entry fun claim_rabbit_fur_earnings(pool_address: address, staker_addr: address, all_stolen: bool) acquires Pool {
         debug::print(&string::utf8(b"inside rabbit claim fun"));
         let pool = borrow_global_mut<Pool>(pool_address);
-        let tax_pool_addr = object::create_object_address(&@owner, b"TaxPool");
+        let tax_pool_addr = object::create_object_address(&@owner, b"staking_module");
         debug::print(&string::utf8(b"Unclaimed Rabbit Earning to be claimed"));
         debug::print(&pool.unclaimed_rabbit_earnings);
         let tax_share = pool.unclaimed_rabbit_earnings * config::rabbit_tax_rate() / 100u64;
@@ -195,7 +243,7 @@ module owner::new_stake {
     }
 
     fun disburse_wolf_tax_earnings(_staker: &signer, _amount: u64) acquires TaxPool {
-        let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"TaxPool")); 
+        let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"staking_module")); 
         let _tax_pool_signer = object::generate_signer_for_extending(&tax_pool.extend_ref);  
 
     }
@@ -207,7 +255,7 @@ module owner::new_stake {
         amount: u64
     ) acquires StakePoolRegistry, Pool {
         let asset_metadata_address = object::object_address(&asset_metadata_object);
-        let pool_address = retrieve_stake_pool_address(staker, asset_metadata_address);
+        let pool_address = retrieve_stake_pool_address(signer::address_of(staker), asset_metadata_address);
 
         update_earnings(&pool_address);
         
@@ -270,14 +318,13 @@ module owner::new_stake {
     
     #[view]
     public fun retrieve_stake_pool_address(
-        staker: &signer,
+        staker: address,
         asset_metadata_address: address
     ): address acquires StakePoolRegistry {
-        let staker_addr = signer::address_of(staker);
 
         // Ensure stake pool registry exists
-        assert!(exists<StakePoolRegistry>(staker_addr), E_NO_STAKE_REGISTRY);
-        let stake_info = borrow_global<StakePoolRegistry>(staker_addr);
+        assert!(exists<StakePoolRegistry>(staker), E_NO_STAKE_REGISTRY);
+        let stake_info = borrow_global<StakePoolRegistry>(staker);
 
         assert!(smart_table::contains(
             &stake_info.fungible_asset_to_stake_pool,
