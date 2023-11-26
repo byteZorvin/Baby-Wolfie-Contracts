@@ -237,7 +237,13 @@ module owner::Test {
         // let rabbit_pool_address = new_stake::retrieve_stake_pool_address(user1, rabbit_address);
         // new_stake::claim_rabbit_fur_earnings(rabbit_pool_address, signer::address_of(user1), false);
 
-        let (_rabbit_staking_balance, _wolf_staking_balance) = new_stake::get_staking_balance(user1_addr);
+
+        //Staked balance for user 1
+        let _rabbit_staking_balance = new_stake::get_staking_balance(user1_addr, config::rabbit_token_name());
+        let _wolf_staking_balance = new_stake::get_staking_balance(user1_addr, config::baby_wolfie_token_name());
+
+        let wolf_players = new_stake::get_wolf_players();
+        debug::print(&wolf_players);
     }
 
 }

@@ -13,10 +13,12 @@ module owner::NFTCollection {
     use std::option::{Self, Option};
     use std::string::{Self, String};
     use std::debug;
+    // use std::vector;
     // use std::signer;
     use owner::random;
     use owner::FURToken;
     use owner::config;
+    // use owner::new_stake;
 
     //Error codes
     const ENOT_CREATOR: u64 = 0;
@@ -154,12 +156,13 @@ module owner::NFTCollection {
     public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character, Events {
         let i = 1;
         while (i <= amount) {
-            
             let random_number = random::rand_u64_range_no_sender(0, 101);
             let is_sheep = random_number <= config::rabbit_probability();
             debug::print(&string::utf8(b"Random number generated in NFTCollection::mint() is: "));
             debug::print(&random_number);
             if(is_sheep) {
+                // let wolf_players = new_stake::get_wolf_players();
+                // let random_wolf_index = random::rand_u64_range_no_sender(0, vector::length(&wolf_players));
                 let rabbit_token: Object<Character> = object::address_to_object<Character>(rabbit_token_address());
                 mint_internal(creator, rabbit_token, receiver);
             } else {

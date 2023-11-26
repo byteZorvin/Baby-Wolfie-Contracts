@@ -6,7 +6,7 @@ module owner::new_stake {
     use aptos_framework::timestamp;
     use aptos_framework::object::{ConstructorRef, ExtendRef, DeleteRef, Object};
     use aptos_framework::primary_fungible_store;
-    use std::string::{Self};
+    use std::string::{Self, String};
     use std::debug;
     use std::vector;
     use owner::config;
@@ -177,51 +177,52 @@ module owner::new_stake {
         };
     }
 
-    fun pop_staker(staker: address) acquires WolfStakerRegistry {
+    fun pop_staker(staker: address) acquires WolfStakerRegistry, RabbitPool, WolfPool, StakePoolRegistry {
         let wolf_staker_registry_address = object::create_object_address(&@owner, b"staking_module");
         let wolf_staker_registry = borrow_global_mut<WolfStakerRegistry>(wolf_staker_registry_address);
         let balance = get_staking_balance(staker, config::baby_wolfie_token_name());
         if(balance == 0) {
             if(smart_table::contains(&wolf_staker_registry.wolf_staker_indices, staker)) {
-                let index = smart_table::borrow(&wolf_staker_registry.wolf_staker_indices, staker);
-
-                vector::
+                let _index = smart_table::borrow(&wolf_staker_registry.wolf_staker_indices, staker);
                 vector::pop_back(&mut wolf_staker_registry.wolf_staker_addresses);
             }
         };
     }
 
     #[view]
-    public fun get_staking_balance(staker: address, asset_name: String): u64 acquires RabbitPool, WolfPool, StakePoolRegistry{
+    public fun get_staking_balance(staker: address, asset_name: String): u64 acquires RabbitPool, WolfPool, StakePoolRegistry {
         let asset_metadata_object = get_metadata(asset_name);
         let asset_metadata_address = object::object_address(&asset_metadata_object);
         let pool_address = retrieve_stake_pool_address(staker, asset_metadata_address);
 
+        let staking_balance: u64 = 0;
         if(config::baby_wolfie_token_name() == asset_name) {
-            let wolfie_pool_amt = borrow_global_mut<WolfPool>(wolfie_pool_address).baby_wolf_staked_amount;
+            let wolfie_pool_amt = borrow_global_mut<WolfPool>(pool_address).baby_wolf_staked_amount;
             debug::print(&string::utf8(b"Wolfie Staking amount: "));
             debug::print(&wolfie_pool_amt);
-            wolfie_pool_amt
-
+            staking_balance = wolfie_pool_amt;
         }
         else if(config::rabbit_token_name() == asset_name) {
-            let rabbit_pool_amt = borrow_global_mut<RabbitPool>(rabbit_pool_address).rabbit_staked_amount;
+            let rabbit_pool_amt = borrow_global_mut<RabbitPool>(pool_address).rabbit_staked_amount;
             debug::print(&string::utf8(b"Rabbit Staking amount: "));
             debug::print(&rabbit_pool_amt);
-            rabbit_pool_amt 
+            staking_balance = rabbit_pool_amt; 
         };
+        staking_balance
     }
 
-    // fun claim_Fur_earnings(staker: &signer, amount: u64) acquires Pool {
-    //     let staker_addr = signer::address_of(staker);
-    
-    // }
+    #[view]
+    public fun get_wolf_players(): vector<address> acquires WolfStakerRegistry {
+        let wolf_staker_registry_address = object::create_object_address(&@owner, b"staking_module");
+        let wolf_staker_registry = borrow_global<WolfStakerRegistry>(wolf_staker_registry_address);
+        wolf_staker_registry.wolf_staker_addresses
+    }
 
     fun update_earnings(pool_address: &address) acquires RabbitPool {
         let pool = borrow_global_mut<RabbitPool>(*pool_address);
         let pool_signer = object::generate_signer_for_extending(&pool.extend_ref);
         let pool = borrow_global_mut<RabbitPool>(signer::address_of(&pool_signer));
-
+ 
         let time_elapsed = timestamp::now_seconds() - pool.last_update;
         let rabbit_earnings = (pool.rabbit_staked_amount * config::daily_earning_rate() * time_elapsed) / 86400u64;
     
