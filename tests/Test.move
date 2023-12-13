@@ -18,7 +18,7 @@ module owner::Test {
     use owner::config;
     use owner::FURToken;
     use owner::NFTCollection;
-    use owner::new_stake;
+    // use owner::new_stake;
     
     public fun init_module_for_test_collection(creator: &signer) {
         NFTCollection::initialize(creator);
@@ -28,9 +28,9 @@ module owner::Test {
         FURToken::initialize(creator);
     }
 
-    public fun init_module_for_test_stake(creator: &signer) {
-        new_stake::initialize(creator);
-    }
+    // public fun init_module_for_test_stake(creator: &signer) {
+    //     new_stake::initialize(creator);
+    // }
     
 
     #[test(creator=@owner, framework=@0x1, user1=@0xcafe, user2=@0x789)] 
@@ -190,13 +190,13 @@ module owner::Test {
 
         // 6 --------------- Staking module ------------------
 
-        init_module_for_test_stake(creator);
+        // init_module_for_test_stake(creator);
 
 
         
         debug::print(&string::utf8(b"Rabbit stake"));
         debug::print(&string::utf8(b"User1 stakes"));
-        new_stake::stake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
+        NFTCollection::stake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
         timestamp::fast_forward_seconds(2*86400);
         // new_stake::stake(user2, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
         // new_stake::stake(user2, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);
@@ -222,7 +222,7 @@ module owner::Test {
 
         debug::print(&string::utf8(b"Wolf stake"));
         debug::print(&string::utf8(b"User1 stakes"));
-        new_stake::stake(user1, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);
+        NFTCollection::stake(user1, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);
         // debug::print(&string::utf8(b"User2 stakes"));
         // new_stake::stake(user2, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 2);
         debug::print(&string::utf8(b"User1 unstakes"));
@@ -239,10 +239,10 @@ module owner::Test {
 
 
         //Staked balance for user 1
-        let _rabbit_staking_balance = new_stake::get_staking_balance(user1_addr, config::rabbit_token_name());
-        let _wolf_staking_balance = new_stake::get_staking_balance(user1_addr, config::baby_wolfie_token_name());
+        let _rabbit_staking_balance = NFTCollection::get_staking_balance(user1_addr, config::rabbit_token_name());
+        let _wolf_staking_balance = NFTCollection::get_staking_balance(user1_addr, config::baby_wolfie_token_name());
 
-        let wolf_players = new_stake::get_wolf_players();
+        let wolf_players = NFTCollection::get_wolf_players();
         debug::print(&wolf_players);
     }
 

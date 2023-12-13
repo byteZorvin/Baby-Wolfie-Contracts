@@ -5,7 +5,7 @@ module owner::FURToken {
     use aptos_framework::fungible_asset::{Self, MintRef, TransferRef, BurnRef, Metadata};
     use aptos_framework::object::{Self, Object};
     use aptos_framework::primary_fungible_store;
-    friend owner::new_stake;
+    // friend owner::new_stake;
     friend owner::NFTCollection;
     #[test_only]
     friend owner::Test;
