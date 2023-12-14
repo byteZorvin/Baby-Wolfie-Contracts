@@ -1,0 +1,1148 @@
+<!-- Copyright © Aptos Foundation -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gas Report - 0x1-code-publish_package_txn</title>
+    <style>
+        /* Add your custom CSS styles here */
+        body {
+            background-color: white;
+            color: black;
+        }
+
+        section {
+            margin-bottom: 60px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid black;
+        }
+
+        td {
+            padding: 2px;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        h2 {
+            background: rgb(220, 220, 220);
+        }
+
+        h3 {
+            background: rgb(240, 240, 240);
+        }
+
+        .flamegraph {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body onload="init();">
+    <header>
+        <h1>Gas Report - 0x1-code-publish_package_txn</h1>
+    </header>
+
+    <section>
+        <h2>Flamegraphs</h2>
+        <object data="assets/exec_io.svg" type="image/svg+xml" class="flamegraph"></object>
+
+        (No storage graph to show.)
+    </section>
+
+    <section>
+        <h2>Cost Break-down</h2>
+        The Aptos network charges a transaction in two parts: (1) execution and IO, and (2) storage.
+
+        <h3> Execution & IO</h3>
+        The execution & IO costs cover the transient resources used for executing the transaction
+        and are quantified in gas units, meaning that the final fee incurred will be subject to the gas unit
+        price established by the gas fee market. This allows one to benefit from low transaction fees when
+        the network is not at capacity.
+
+        <h4>Intrinsic Cost</h4>
+        44.568 gas units
+        , 28.69% of the total cost for execution & IO.
+        <h4>Execution</h4>
+        <table>
+            <tr>
+                <th><b>Operation</b></th>
+                <th style="text-align: right"><b>Number of Hits</th>
+                <th style="text-align: right"><b>Cost in Gas Units</b></th>
+                <th style="text-align: right"><b>Percentage</b></th>
+            </tr>
+            <tr>
+                <td>0x1::util::from_bytes&lt;0x1::code::PackageMetadata&gt;</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.9415</td>
+                <td style="text-align: right">0.61%</td>
+            </tr>
+            <tr>
+                <td>call</td>
+                <td style="text-align: right">22</td>
+                <td style="text-align: right">0.686</td>
+                <td style="text-align: right">0.44%</td>
+            </tr>
+            <tr>
+                <td>0x1::code::request_publish_with_allowed_deps</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.51972</td>
+                <td style="text-align: right">0.33%</td>
+            </tr>
+            <tr>
+                <td>ld_const</td>
+                <td style="text-align: right">14</td>
+                <td style="text-align: right">0.392</td>
+                <td style="text-align: right">0.25%</td>
+            </tr>
+            <tr>
+                <td>copy_loc</td>
+                <td style="text-align: right">72</td>
+                <td style="text-align: right">0.3456</td>
+                <td style="text-align: right">0.22%</td>
+            </tr>
+            <tr>
+                <td>move_loc</td>
+                <td style="text-align: right">94</td>
+                <td style="text-align: right">0.2256</td>
+                <td style="text-align: right">0.15%</td>
+            </tr>
+            <tr>
+                <td>st_loc</td>
+                <td style="text-align: right">87</td>
+                <td style="text-align: right">0.2088</td>
+                <td style="text-align: right">0.13%</td>
+            </tr>
+            <tr>
+                <td>read_ref</td>
+                <td style="text-align: right">23</td>
+                <td style="text-align: right">0.18816</td>
+                <td style="text-align: right">0.12%</td>
+            </tr>
+            <tr>
+                <td>br_false</td>
+                <td style="text-align: right">66</td>
+                <td style="text-align: right">0.1584</td>
+                <td style="text-align: right">0.10%</td>
+            </tr>
+            <tr>
+                <td>branch</td>
+                <td style="text-align: right">68</td>
+                <td style="text-align: right">0.1088</td>
+                <td style="text-align: right">0.07%</td>
+            </tr>
+            <tr>
+                <td>imm_borrow_field</td>
+                <td style="text-align: right">26</td>
+                <td style="text-align: right">0.104</td>
+                <td style="text-align: right">0.07%</td>
+            </tr>
+            <tr>
+                <td>vec_push_back</td>
+                <td style="text-align: right">10</td>
+                <td style="text-align: right">0.076</td>
+                <td style="text-align: right">0.05%</td>
+            </tr>
+            <tr>
+                <td>vec_imm_borrow</td>
+                <td style="text-align: right">10</td>
+                <td style="text-align: right">0.066</td>
+                <td style="text-align: right">0.04%</td>
+            </tr>
+            <tr>
+                <td>eq</td>
+                <td style="text-align: right">7</td>
+                <td style="text-align: right">0.0588</td>
+                <td style="text-align: right">0.04%</td>
+            </tr>
+            <tr>
+                <td>pack</td>
+                <td style="text-align: right">10</td>
+                <td style="text-align: right">0.0552</td>
+                <td style="text-align: right">0.04%</td>
+            </tr>
+            <tr>
+                <td>lt</td>
+                <td style="text-align: right">14</td>
+                <td style="text-align: right">0.0448</td>
+                <td style="text-align: right">0.03%</td>
+            </tr>
+            <tr>
+                <td>ld_true</td>
+                <td style="text-align: right">33</td>
+                <td style="text-align: right">0.0396</td>
+                <td style="text-align: right">0.03%</td>
+            </tr>
+            <tr>
+                <td>vec_pack</td>
+                <td style="text-align: right">3</td>
+                <td style="text-align: right">0.036</td>
+                <td style="text-align: right">0.02%</td>
+            </tr>
+            <tr>
+                <td>exists_generic</td>
+                <td style="text-align: right">6</td>
+                <td style="text-align: right">0.03</td>
+                <td style="text-align: right">0.02%</td>
+            </tr>
+            <tr>
+                <td>add</td>
+                <td style="text-align: right">9</td>
+                <td style="text-align: right">0.0288</td>
+                <td style="text-align: right">0.02%</td>
+            </tr>
+            <tr>
+                <td>0x1::string::internal_check_utf8</td>
+                <td style="text-align: right">4</td>
+                <td style="text-align: right">0.024</td>
+                <td style="text-align: right">0.02%</td>
+            </tr>
+            <tr>
+                <td>call_generic</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.024</td>
+                <td style="text-align: right">0.02%</td>
+            </tr>
+            <tr>
+                <td>vec_len</td>
+                <td style="text-align: right">5</td>
+                <td style="text-align: right">0.022</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>ret</td>
+                <td style="text-align: right">17</td>
+                <td style="text-align: right">0.0204</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>imm_borrow_global</td>
+                <td style="text-align: right">2</td>
+                <td style="text-align: right">0.02</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>ld_u64</td>
+                <td style="text-align: right">15</td>
+                <td style="text-align: right">0.018</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>imm_borrow_loc</td>
+                <td style="text-align: right">10</td>
+                <td style="text-align: right">0.012</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>mut_borrow_loc</td>
+                <td style="text-align: right">10</td>
+                <td style="text-align: right">0.012</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>move_to_generic</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.01</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>mut_borrow_global</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.01</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>neq</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0084</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>mut_borrow_field</td>
+                <td style="text-align: right">2</td>
+                <td style="text-align: right">0.008</td>
+                <td style="text-align: right">0.01%</td>
+            </tr>
+            <tr>
+                <td>0x1::signer::borrow_address</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.004</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>write_ref</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.004</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>ld_u8</td>
+                <td style="text-align: right">3</td>
+                <td style="text-align: right">0.0036</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>bit_and</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0032</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>div</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0032</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>gt</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0032</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>mod</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0032</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>not</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0032</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>pop</td>
+                <td style="text-align: right">4</td>
+                <td style="text-align: right">0.0032</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>shl</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0032</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+            <tr>
+                <td>cast_u8</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.0024</td>
+                <td style="text-align: right">0.00%</td>
+            </tr>
+        </table>
+        <h4>Storage Reads</h4>
+        <table>
+            <tr>
+                <td><b>Resource Name</b></td>
+                <td style="text-align: right"><b>Number of Hits</td>
+                <td style="text-align: right"><b>Cost in Gas Units</b></td>
+                <td style="text-align: right"><b>Percentage</b></td>
+            </tr>
+            <tr>
+                <td>0x1::code::PackageRegistry</td>
+                <td style="text-align: right">3</td>
+                <td style="text-align: right">105.9177</td>
+                <td style="text-align: right">68.19%</td>
+            </tr>
+            <tr>
+                <td>0x1::features::Features</td>
+                <td style="text-align: right">1</td>
+                <td style="text-align: right">0.3018</td>
+                <td style="text-align: right">0.19%</td>
+            </tr>
+        </table>
+        <h4>Storage Writes</h4>
+        (No writes to show.)
+        <h3>Storage</h3>
+        The storage fees cover the extended-term storage of states and events and are assessed at a fixed price in APT.
+
+        <h4>Transaction</h4>
+        0 APT
+        <h4>States</h4>
+        (No state changes to show.)
+        <h4>Events</h4>
+        (No events to show.)
+    </section>
+
+    <section>
+        <h2>Full Execution Trace</h2>
+        <div>
+            <pre style="display: inline-block; border:1px solid black; padding: 2px;"><code>execution &amp; IO (gas unit, full trace)                        155.32648    100.00%
+    intrinsic                                                44.568       28.69%
+    0x1::code::publish_package_txn                           110.75848    71.31%
+        move_loc                                             0.0024       0.00%
+        move_loc                                             0.0024       0.00%
+        call_generic                                         0.024        0.02%
+        0x1::util::from_bytes&lt;0x1::code::PackageMetadata&gt;    0.9415       0.61%
+        move_loc                                             0.0024       0.00%
+        call                                                 0.064        0.04%
+        0x1::code::publish_package                           109.72058    70.64%
+            call                                             0.02         0.01%
+            0x1::code::upgrade_policy_arbitrary              0.0076       0.00%
+                ld_u8                                        0.0012       0.00%
+                pack                                         0.0052       0.00%
+                ret                                          0.0012       0.00%
+            st_loc                                           0.0024       0.00%
+            imm_borrow_loc                                   0.0012       0.00%
+            imm_borrow_field                                 0.004        0.00%
+            imm_borrow_field                                 0.004        0.00%
+            read_ref                                         0.0072       0.00%
+            imm_borrow_loc                                   0.0012       0.00%
+            imm_borrow_field                                 0.004        0.00%
+            read_ref                                         0.0072       0.00%
+            gt                                               0.0032       0.00%
+            br_false                                         0.0024       0.00%
+            branch                                           0.0016       0.00%
+            @17                                                           
+            copy_loc                                         0.0048       0.00%
+            call                                             0.024        0.02%
+            0x1::signer::address_of                          0.0368       0.02%
+                move_loc                                     0.0024       0.00%
+                call                                         0.022        0.01%
+                0x1::signer::borrow_address                  0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                ret                                          0.0012       0.00%
+            st_loc                                           0.0024       0.00%
+            copy_loc                                         0.0048       0.00%
+            load&lt;0xce91..::0x1::code::PackageRegistry&gt;       0.3          0.19%
+            exists_generic                                   0.005        0.00%
+            not                                              0.0032       0.00%
+            br_false                                         0.0024       0.00%
+            move_loc                                         0.0024       0.00%
+            vec_pack                                         0.012        0.01%
+            pack                                             0.0052       0.00%
+            move_to_generic                                  0.01         0.01%
+            branch                                           0.0016       0.00%
+            @31                                                           
+            copy_loc                                         0.0048       0.00%
+            imm_borrow_loc                                   0.0012       0.00%
+            call                                             0.06         0.04%
+            0x1::code::check_dependencies                    107.3839     69.13%
+                vec_pack                                     0.012        0.01%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                st_loc                                       0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_len                                      0.0044       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                load&lt;0x1::0x1::code::PackageRegistry&gt;        98.991       63.73%
+                exists_generic                               0.005        0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @34                                                       
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                call                                         0.042        0.03%
+                0x1::code::is_policy_exempted_address        0.1398       0.09%
+                    copy_loc                                 0.0048       0.00%
+                    ld_const                                 0.0354       0.02%
+                    eq                                       0.0084       0.01%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @11                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @20                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @29                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @38                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @47                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @56                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @65                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @74                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @83                                                   
+                    move_loc                                 0.0024       0.00%
+                    ret                                      0.0012       0.00%
+                br_false                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                st_loc                                       0.0024       0.00%
+                ld_const                                     0.0137       0.01%
+                call                                         0.024        0.02%
+                0x1::string::utf8                            0.042        0.03%
+                    imm_borrow_loc                           0.0012       0.00%
+                    call                                     0.022        0.01%
+                    0x1::string::internal_check_utf8         0.006        0.00%
+                    br_false                                 0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @6                                                    
+                    move_loc                                 0.0024       0.00%
+                    pack                                     0.0052       0.00%
+                    ret                                      0.0012       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                pack                                         0.006        0.00%
+                vec_push_back                                0.0076       0.00%
+                branch                                       0.0016       0.00%
+                @195                                                      
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                exists_generic                               0.005        0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @34                                                       
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                call                                         0.042        0.03%
+                0x1::code::is_policy_exempted_address        0.1398       0.09%
+                    copy_loc                                 0.0048       0.00%
+                    ld_const                                 0.0354       0.02%
+                    eq                                       0.0084       0.01%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @11                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @20                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @29                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @38                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @47                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @56                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @65                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @74                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @83                                                   
+                    move_loc                                 0.0024       0.00%
+                    ret                                      0.0012       0.00%
+                br_false                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                st_loc                                       0.0024       0.00%
+                ld_const                                     0.0137       0.01%
+                call                                         0.024        0.02%
+                0x1::string::utf8                            0.042        0.03%
+                    imm_borrow_loc                           0.0012       0.00%
+                    call                                     0.022        0.01%
+                    0x1::string::internal_check_utf8         0.006        0.00%
+                    br_false                                 0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @6                                                    
+                    move_loc                                 0.0024       0.00%
+                    pack                                     0.0052       0.00%
+                    ret                                      0.0012       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                pack                                         0.006        0.00%
+                vec_push_back                                0.0076       0.00%
+                branch                                       0.0016       0.00%
+                @195                                                      
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                exists_generic                               0.005        0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @34                                                       
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                call                                         0.042        0.03%
+                0x1::code::is_policy_exempted_address        0.1398       0.09%
+                    copy_loc                                 0.0048       0.00%
+                    ld_const                                 0.0354       0.02%
+                    eq                                       0.0084       0.01%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @11                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @20                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @29                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @38                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @47                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @56                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @65                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @74                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @83                                                   
+                    move_loc                                 0.0024       0.00%
+                    ret                                      0.0012       0.00%
+                br_false                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                st_loc                                       0.0024       0.00%
+                ld_const                                     0.0137       0.01%
+                call                                         0.024        0.02%
+                0x1::string::utf8                            0.042        0.03%
+                    imm_borrow_loc                           0.0012       0.00%
+                    call                                     0.022        0.01%
+                    0x1::string::internal_check_utf8         0.006        0.00%
+                    br_false                                 0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @6                                                    
+                    move_loc                                 0.0024       0.00%
+                    pack                                     0.0052       0.00%
+                    ret                                      0.0012       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                pack                                         0.006        0.00%
+                vec_push_back                                0.0076       0.00%
+                branch                                       0.0016       0.00%
+                @195                                                      
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                load&lt;0x4::0x1::code::PackageRegistry&gt;        6.6267       4.27%
+                exists_generic                               0.005        0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @34                                                       
+                copy_loc                                     0.0048       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                call                                         0.042        0.03%
+                0x1::code::is_policy_exempted_address        0.2772       0.18%
+                    copy_loc                                 0.0048       0.00%
+                    ld_const                                 0.0354       0.02%
+                    eq                                       0.0084       0.01%
+                    br_false                                 0.0024       0.00%
+                    @7                                                    
+                    copy_loc                                 0.0048       0.00%
+                    ld_const                                 0.0354       0.02%
+                    eq                                       0.0084       0.01%
+                    st_loc                                   0.0024       0.00%
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    @16                                                   
+                    copy_loc                                 0.0048       0.00%
+                    ld_const                                 0.0354       0.02%
+                    eq                                       0.0084       0.01%
+                    st_loc                                   0.0024       0.00%
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    @25                                                   
+                    copy_loc                                 0.0048       0.00%
+                    ld_const                                 0.0354       0.02%
+                    eq                                       0.0084       0.01%
+                    st_loc                                   0.0024       0.00%
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @38                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @47                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @56                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @65                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @74                                                   
+                    move_loc                                 0.0024       0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_true                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @83                                                   
+                    move_loc                                 0.0024       0.00%
+                    ret                                      0.0012       0.00%
+                br_false                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.0072       0.00%
+                st_loc                                       0.0024       0.00%
+                ld_const                                     0.0137       0.01%
+                call                                         0.024        0.02%
+                0x1::string::utf8                            0.042        0.03%
+                    imm_borrow_loc                           0.0012       0.00%
+                    call                                     0.022        0.01%
+                    0x1::string::internal_check_utf8         0.006        0.00%
+                    br_false                                 0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @6                                                    
+                    move_loc                                 0.0024       0.00%
+                    pack                                     0.0052       0.00%
+                    ret                                      0.0012       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                pack                                         0.006        0.00%
+                vec_push_back                                0.0076       0.00%
+                branch                                       0.0016       0.00%
+                @195                                                      
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                @200                                                      
+                move_loc                                     0.0024       0.00%
+                pop                                          0.0008       0.00%
+                move_loc                                     0.0024       0.00%
+                pop                                          0.0008       0.00%
+                move_loc                                     0.0024       0.00%
+                ret                                          0.0012       0.00%
+            st_loc                                           0.0024       0.00%
+            imm_borrow_loc                                   0.0012       0.00%
+            call                                             0.034        0.02%
+            0x1::code::get_module_names                      0.42276      0.27%
+                vec_pack                                     0.012        0.01%
+                st_loc                                       0.0024       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                st_loc                                       0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_len                                      0.0044       0.00%
+                st_loc                                       0.0024       0.00%
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.01104      0.01%
+                vec_push_back                                0.0076       0.00%
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.01088      0.01%
+                vec_push_back                                0.0076       0.00%
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.01088      0.01%
+                vec_push_back                                0.0076       0.00%
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.01144      0.01%
+                vec_push_back                                0.0076       0.00%
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @15                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                vec_imm_borrow                               0.0066       0.00%
+                st_loc                                       0.0024       0.00%
+                mut_borrow_loc                               0.0012       0.00%
+                move_loc                                     0.0024       0.00%
+                imm_borrow_field                             0.004        0.00%
+                read_ref                                     0.01112      0.01%
+                vec_push_back                                0.0076       0.00%
+                move_loc                                     0.0024       0.00%
+                ld_u64                                       0.0012       0.00%
+                add                                          0.0032       0.00%
+                st_loc                                       0.0024       0.00%
+                branch                                       0.0016       0.00%
+                @10                                                       
+                copy_loc                                     0.0048       0.00%
+                copy_loc                                     0.0048       0.00%
+                lt                                           0.0032       0.00%
+                br_false                                     0.0024       0.00%
+                @29                                                       
+                move_loc                                     0.0024       0.00%
+                pop                                          0.0008       0.00%
+                move_loc                                     0.0024       0.00%
+                ret                                          0.0012       0.00%
+            st_loc                                           0.0024       0.00%
+            copy_loc                                         0.0048       0.00%
+            imm_borrow_global                                0.01         0.01%
+            imm_borrow_field                                 0.004        0.00%
+            st_loc                                           0.0024       0.00%
+            copy_loc                                         0.0048       0.00%
+            vec_len                                          0.0044       0.00%
+            st_loc                                           0.0024       0.00%
+            copy_loc                                         0.0048       0.00%
+            st_loc                                           0.0024       0.00%
+            ld_u64                                           0.0012       0.00%
+            st_loc                                           0.0024       0.00%
+            move_loc                                         0.0024       0.00%
+            st_loc                                           0.0024       0.00%
+            ld_u64                                           0.0012       0.00%
+            st_loc                                           0.0024       0.00%
+            copy_loc                                         0.0048       0.00%
+            vec_len                                          0.0044       0.00%
+            st_loc                                           0.0024       0.00%
+            copy_loc                                         0.0048       0.00%
+            copy_loc                                         0.0048       0.00%
+            lt                                               0.0032       0.00%
+            br_false                                         0.0024       0.00%
+            @98                                                           
+            move_loc                                         0.0024       0.00%
+            pop                                              0.0008       0.00%
+            move_loc                                         0.0024       0.00%
+            mut_borrow_loc                                   0.0012       0.00%
+            mut_borrow_field                                 0.004        0.00%
+            write_ref                                        0.004        0.00%
+            copy_loc                                         0.0048       0.00%
+            mut_borrow_global                                0.01         0.01%
+            mut_borrow_field                                 0.004        0.00%
+            st_loc                                           0.0024       0.00%
+            imm_borrow_loc                                   0.0012       0.00%
+            imm_borrow_field                                 0.004        0.00%
+            read_ref                                         0.0104       0.01%
+            st_loc                                           0.0024       0.00%
+            copy_loc                                         0.0048       0.00%
+            move_loc                                         0.0024       0.00%
+            lt                                               0.0032       0.00%
+            br_false                                         0.0024       0.00%
+            @122                                                          
+            move_loc                                         0.0024       0.00%
+            move_loc                                         0.0024       0.00%
+            vec_push_back                                    0.0076       0.00%
+            call                                             0.02         0.01%
+            0x1::features::code_dependency_check_enabled     0.5724       0.37%
+                ld_const                                     0.0186       0.01%
+                call                                         0.026        0.02%
+                0x1::features::is_enabled                    0.5266       0.34%
+                    ld_const                                 0.0354       0.02%
+                    load&lt;0x1::0x1::features::Features&gt;       0.3018       0.19%
+                    exists_generic                           0.005        0.00%
+                    br_false                                 0.0024       0.00%
+                    ld_const                                 0.0354       0.02%
+                    imm_borrow_global                        0.01         0.01%
+                    imm_borrow_field                         0.004        0.00%
+                    move_loc                                 0.0024       0.00%
+                    call                                     0.034        0.02%
+                    0x1::features::contains                  0.0886       0.06%
+                        copy_loc                             0.0048       0.00%
+                        ld_u64                               0.0012       0.00%
+                        div                                  0.0032       0.00%
+                        st_loc                               0.0024       0.00%
+                        ld_u8                                0.0012       0.00%
+                        move_loc                             0.0024       0.00%
+                        ld_u64                               0.0012       0.00%
+                        mod                                  0.0032       0.00%
+                        cast_u8                              0.0024       0.00%
+                        shl                                  0.0032       0.00%
+                        st_loc                               0.0024       0.00%
+                        copy_loc                             0.0048       0.00%
+                        copy_loc                             0.0048       0.00%
+                        vec_len                              0.0044       0.00%
+                        lt                                   0.0032       0.00%
+                        br_false                             0.0024       0.00%
+                        move_loc                             0.0024       0.00%
+                        move_loc                             0.0024       0.00%
+                        vec_imm_borrow                       0.0066       0.00%
+                        read_ref                             0.0072       0.00%
+                        move_loc                             0.0024       0.00%
+                        bit_and                              0.0032       0.00%
+                        ld_u8                                0.0012       0.00%
+                        neq                                  0.0084       0.01%
+                        st_loc                               0.0024       0.00%
+                        branch                               0.0016       0.00%
+                        @30                                               
+                        move_loc                             0.0024       0.00%
+                        ret                                  0.0012       0.00%
+                    st_loc                                   0.0024       0.00%
+                    branch                                   0.0016       0.00%
+                    @12                                                   
+                    move_loc                                 0.0024       0.00%
+                    ret                                      0.0012       0.00%
+                ret                                          0.0012       0.00%
+            br_false                                         0.0024       0.00%
+            move_loc                                         0.0024       0.00%
+            move_loc                                         0.0024       0.00%
+            move_loc                                         0.0024       0.00%
+            move_loc                                         0.0024       0.00%
+            imm_borrow_loc                                   0.0012       0.00%
+            imm_borrow_field                                 0.004        0.00%
+            read_ref                                         0.0072       0.00%
+            call                                             0.03         0.02%
+            0x1::code::request_publish_with_allowed_deps     0.51972      0.33%
+            branch                                           0.0016       0.00%
+            @143                                                          
+            ret                                              0.0012       0.00%
+        ret                                                  0.0012       0.00%
+    writes                                                                
+</code></pre>
+        </div>
+    </section>
+
+    <footer>
+        <p>Generated by the Aptos Gas Profiler</p>
+    </footer>
+</body>
+
+</html>
