@@ -223,9 +223,23 @@ module owner::Test {
         debug::print(&string::utf8(b"Wolf stake"));
         debug::print(&string::utf8(b"User1 stakes"));
         NFTCollection::stake(user1, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);
+        
+        timestamp::fast_forward_seconds(2*86400);
+
+        debug::print(&string::utf8(b"Stealing by user1"));
+
+        let user1_rabbit_before_steal = primary_fungible_store::balance(user1_addr, NFTCollection::get_metadata(config::rabbit_token_name()));
+        debug::print(&string::utf8(b"User1 rabbit before steal: "));
+        debug::print(&user1_rabbit_before_steal);
+
+        NFTCollection::mint(user1, signer::address_of(user1), 1u64);
+
+        let user1_rabbit_after_steal = primary_fungible_store::balance(user1_addr, NFTCollection::get_metadata(config::rabbit_token_name()));
+        debug::print(&string::utf8(b"User1 rabbit after steal: "));
+        debug::print(&user1_rabbit_after_steal);
         // debug::print(&string::utf8(b"User2 stakes"));
         // new_stake::stake(user2, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 2);
-        debug::print(&string::utf8(b"User1 unstakes"));
+        // debug::print(&string::utf8(b"User1 unstakes"));
         // new_stake::unstake(user1, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);
         // debug::print(&string::utf8(b"User2 unstakes"));
         // new_stake::unstake(user2, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);

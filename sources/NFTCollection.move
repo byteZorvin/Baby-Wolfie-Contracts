@@ -63,7 +63,6 @@ module owner::NFTCollection {
         wolf_staker_addresses: vector<address>,
         wolf_staker_indices: smart_table::SmartTable<address, u64>
     }
-
     
     struct RabbitPool has key {
         extend_ref: ExtendRef,
@@ -209,16 +208,33 @@ module owner::NFTCollection {
     }
     
     
-    public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character, Events, WolfStakerRegistry{
+    public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character, Events, WolfStakerRegistry {
         let i = 1;
         while (i <= amount) {
-            let random_number = random::rand_u64_range_no_sender(0, 101);
-            let is_sheep = random_number <= config::rabbit_probability();
-            debug::print(&string::utf8(b"Random number generated in NFTCollection::mint() is: "));
-            debug::print(&random_number);
-            if(is_sheep) {
+            let random_number_for_mint = random::rand_u64_range_no_sender(0, 101);
+            let is_rabbit = random_number_for_mint <= config::rabbit_probability();
+
+            let random_number_for_steal = random::rand_u64_range_no_sender(0, 101);
+            let is_steal = random_number_for_steal <= config::steal_probability();
+
+            debug::print(&string::utf8(b"Random number for mint generated in NFTCollection::mint() is: "));
+            debug::print(&random_number_for_mint);
+
+            debug::print(&string::utf8(b"Random number for steal generated in NFTCollection::mint() is: "));
+            debug::print(&random_number_for_steal);
+
+            if(is_rabbit) {
                 let wolf_players = get_wolf_players();
-                let random_wolf_index = random::rand_u64_range_no_sender(0, vector::length(&wolf_players));
+                debug::print(&string::utf8(b"Wolf player vec length"));
+                debug::print(&vector::length(&wolf_players));
+                if(vector::length(&wolf_players) > 0 && is_steal) {
+                    debug::print(&string::utf8(b"Stealing the rabbit"));
+                    let _random_wolf_index = random::rand_u64_range_no_sender(0, vector::length(&wolf_players));
+                    let wolf_staker_address = vector::borrow(&wolf_players, _random_wolf_index);
+                    debug::print(&string::utf8(b"Wolf staker address is: "));
+                    debug::print(wolf_staker_address);
+                    receiver = *wolf_staker_address;
+                };
                 let rabbit_token: Object<Character> = object::address_to_object<Character>(rabbit_token_address());
                 mint_internal(creator, rabbit_token, receiver);
             } else {
@@ -268,6 +284,12 @@ module owner::NFTCollection {
         };
 
         let fa = fungible_asset::mint(&character_token.fungible_asset_mint_ref, 1);
+        if (token_address == rabbit_token_address() ){
+            debug::print(&string::utf8(b"Rabbit minted !!"));
+        }
+        else if (token_address == baby_wolfie_token_address()) {
+            debug::print(&string::utf8(b"Baby wolfie minted !!"));
+        };
         primary_fungible_store::deposit(receiver, fa);
         event::emit_event<AssetMintingEvent>(
             &mut borrow_global_mut<Events>(@owner).asset_minting_events, 

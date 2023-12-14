@@ -13,6 +13,7 @@ module owner::config {
     const BABY_WOLFIE_SYMBOL_NAME: vector<u8> = b"BW";
 
     const RABBIT_PROBABILITY: u64 = 50;
+    const STEAL_PROBABILITY: u64 = 20;
 
     const Gen0_Max: u128 = 2u128;
     const Gen1_Max: u128 = 20u128;
@@ -23,6 +24,10 @@ module owner::config {
 
     public fun rabbit_probability(): u64 {
         RABBIT_PROBABILITY
+    }
+
+    public fun steal_probability(): u64 {
+        STEAL_PROBABILITY
     }
 
     public fun collection_name(): String {
