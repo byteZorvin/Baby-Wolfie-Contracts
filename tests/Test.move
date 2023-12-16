@@ -50,7 +50,7 @@ module owner::Test {
         let user2_addr = signer::address_of(user2);
         account::create_account_for_test(user2_addr);
 
-        debug::print(&string::utf8(b"Initialising blockchain parameters"));
+        debug::print(&string::utf8(b"Initialising blockchain\n"));
         // 2. Initialise aptos parameters
         block::initialize_for_test(framework_acc, 10000);
         timestamp::set_time_has_started_for_testing(framework);
@@ -79,8 +79,8 @@ module owner::Test {
             8,
             false,
         );
-        let coins = coin::mint<AptosCoin>(1000, &mint_cap);
-        coin::deposit(user1_addr, coins);
+        let coins_minted = coin::mint<AptosCoin>(1000, &mint_cap);
+        coin::deposit(user1_addr, coins_minted);
         coin::transfer<AptosCoin>(user1, user2_addr, 500);
 
         let balance_user1 = coin::balance<AptosCoin>(user1_addr);
@@ -93,6 +93,7 @@ module owner::Test {
         let owner_before_balance = coin::balance<AptosCoin>(creator_addr);
         assert!(owner_before_balance == 0, 3);
         
+        debug::print(&string::utf8(b"Destroying capabilities of APT coin \n"));
         // 3.3 Destroy capabilities for AptosCoin
         coin::destroy_mint_cap(mint_cap);
         coin::destroy_freeze_cap(freeze_cap);
