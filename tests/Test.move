@@ -99,8 +99,8 @@ module owner::Test {
         coin::destroy_freeze_cap(freeze_cap);
         coin::destroy_burn_cap(burn_cap);
 
-        let rabbit_metadata = NFTCollection::get_metadata(config::baby_wolfie_token_name());
-        let token_current_supply_before_mint = option::destroy_some<u128>(fungible_asset::supply(rabbit_metadata));
+        let wolfie_metadata = NFTCollection::get_metadata(config::baby_wolfie_token_name());
+        let token_current_supply_before_mint = option::destroy_some<u128>(fungible_asset::supply(wolfie_metadata));
         let mint_cost = config::gen0_mint_price();
         assert!(token_current_supply_before_mint == 0, 4);
 

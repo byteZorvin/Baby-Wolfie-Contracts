@@ -197,6 +197,8 @@ module owner::NFTCollection {
         move_to(&object_signer, character_token);
     }
 
+
+
     #[view]
     public fun rabbit_token_address(): address {
         token::create_token_address(&@owner, &config::collection_name(), &config::rabbit_token_name())
@@ -207,6 +209,32 @@ module owner::NFTCollection {
         token::create_token_address(&@owner, &config::collection_name(), &config::baby_wolfie_token_name())
     }
     
+
+    #[view]
+    public fun get_balance_rabbit(user: address): u64{
+        primary_fungible_store::balance(user, get_metadata(config::rabbit_token_name()))
+    }
+
+    #[view]
+    public fun get_balance_baby_wolfie(user: address): u64 {
+        primary_fungible_store::balance(user, get_metadata(config::baby_wolfie_token_name()))
+    }  
+
+    #[view]
+    public fun get_suppply(): Option<u128> {
+        let wolfie_metadata = get_metadata(config::baby_wolfie_token_name());
+        fungible_asset::supply(wolfie_metadata)
+    }
+
+    #[view]
+    public fun get_wolfie_supply(): Option<u128> {
+        let rabbit_metadata = get_metadata(config::rabbit_token_name());
+        fungible_asset::supply(rabbit_metadata)
+    }
+    // #[view]
+    // public fun get_rabbit_pool(user: address) acquires RabbitPool {
+
+    // }
     
     public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character, Events, WolfStakerRegistry {
         let i = 1;
@@ -318,11 +346,6 @@ module owner::NFTCollection {
         let asset_address: address = token::create_token_address(&@owner, &config::collection_name(), &token_name);
         let token = object::address_to_object<Character>(asset_address);
         return token
-    }
-
-    #[test_only]
-    public fun initialize(sender: &signer) {
-        init_module(sender);
     }
 
     #[view]
@@ -483,6 +506,14 @@ module owner::NFTCollection {
         pool.last_update = timestamp::now_seconds();
     }
 
+    #[view]
+    public fun claimable_fur(staker_addr: address): u64 acquires RabbitPool, StakePoolRegistry {
+        let asset_metadata_object = get_metadata(config::rabbit_token_name());
+        let asset_metadata_address = object::object_address(&asset_metadata_object);
+        let pool_address = retrieve_stake_pool_address(staker_addr, asset_metadata_address);
+        let pool = borrow_global_mut<RabbitPool>(pool_address);
+        pool.unclaimed_rabbit_earnings
+    }
 
     public entry fun claim_rabbit_fur_earnings(pool_address: address, staker_addr: address, all_stolen: bool) acquires RabbitPool {
         debug::print(&string::utf8(b"inside rabbit claim fun"));
@@ -649,4 +680,9 @@ module owner::NFTCollection {
         }
     }
 
+
+    #[test_only]
+    public fun initialize(sender: &signer) {
+        init_module(sender);
+    }
 }
