@@ -114,7 +114,7 @@ module owner::Test {
         assert!(balance_user1_after_mint_gen0 == balance_user1 - mint_cost, 5);
 
         // Supply should increase by one
-        let token_current_supply_after_one_mint = option::destroy_some<u128>(fungible_asset::supply(rabbit_metadata));
+        let token_current_supply_after_one_mint = option::destroy_some<u128>(fungible_asset::supply(wolfie_metadata));
         assert!(token_current_supply_after_one_mint == token_current_supply_before_mint + 1, 6);
 
         // Minting cost should not change after this mint as its still gen 0
@@ -151,7 +151,7 @@ module owner::Test {
         let user1_furToken_balance_before = primary_fungible_store::balance(user1_addr, FURToken::get_metadata());
         let user1_rabbit_character_balance_before = primary_fungible_store::balance(user1_addr, NFTCollection::get_metadata(config::rabbit_token_name()));
         let user1_wolf_character_balance_before = primary_fungible_store::balance(user1_addr, NFTCollection::get_metadata(config::baby_wolfie_token_name()));
-        let token_current_supply_before_mint = option::destroy_some<u128>(fungible_asset::supply(rabbit_metadata));
+        let token_current_supply_before_mint = option::destroy_some<u128>(fungible_asset::supply(wolfie_metadata));
 
         debug::print(&string::utf8(b"Minting Rabbit/Wolf to user1 and user2 in gen 1"));
 
@@ -198,13 +198,13 @@ module owner::Test {
         debug::print(&string::utf8(b"Rabbit stake"));
         debug::print(&string::utf8(b"User1 stakes"));
         NFTCollection::stake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
-        timestamp::fast_forward_seconds(2*86400);
+        timestamp::fast_forward_seconds(43200);
         // new_stake::stake(user2, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
         // new_stake::stake(user2, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);
         debug::print(&string::utf8(b"User1 unstakes"));
         // debug::print(&string::utf8(b"User2 unstakes"));
-        timestamp::fast_forward_seconds(2*86400);
-        // new_stake::unstake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
+        // timestamp::fast_forward_seconds(2*86400);
+        NFTCollection::unstake(user1, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
 
         // new_stake::unstake(user2, NFTCollection::get_metadata(config::rabbit_token_name()), 1);
 
@@ -258,7 +258,15 @@ module owner::Test {
         let _wolf_staking_balance = NFTCollection::get_staking_balance(user1_addr, config::baby_wolfie_token_name());
 
         let wolf_players = NFTCollection::get_wolf_players();
+        debug::print(&string::utf8(b"Wolf players after staking"));
         debug::print(&wolf_players);
+
+        NFTCollection::unstake(user1, NFTCollection::get_metadata(config::baby_wolfie_token_name()), 1);
+
+        let wolf_players = NFTCollection::get_wolf_players();
+        debug::print(&string::utf8(b"Wolf players after unstaking"));
+        debug::print(&wolf_players);
+
     }
 
 }

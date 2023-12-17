@@ -5,6 +5,7 @@ module owner::FURToken {
     use aptos_framework::fungible_asset::{Self, MintRef, TransferRef, BurnRef, Metadata};
     use aptos_framework::object::{Self, Object};
     use aptos_framework::primary_fungible_store;
+    use std::signer;
     // friend owner::new_stake;
     friend owner::NFTCollection;
     #[test_only]
@@ -73,7 +74,7 @@ module owner::FURToken {
     }
 
 
-    fun transfer(  // can not be called externally
+    fun transfer_with_ref(  // can not be called externally
         from: address,      // Why not signer here ??
         to: address,
         amount: u64
@@ -99,9 +100,30 @@ module owner::FURToken {
         );
     }
 
+    public entry fun transfer(
+        from: &signer, 
+        to: address, 
+        amount: u64
+    ) acquires FurToken {
+        let metadata = get_metadata();
+        let refs = borrow_global<FurToken>(object::object_address(&metadata));
+
+        let from_primary_store = primary_fungible_store::primary_store(
+            signer::address_of(from), 
+            fungible_asset::transfer_ref_metadata(&refs.transfer_ref)
+        );
+
+        let to_primary_store = primary_fungible_store::ensure_primary_store_exists(
+            to, 
+            fungible_asset::transfer_ref_metadata(&refs.transfer_ref)
+        );
+
+        fungible_asset::transfer(from, from_primary_store, to_primary_store, amount);
+    }
+
     
-    #[test_only]
-    use std::signer;
+    // #[test_only]
+    //use std::signer;
     // use std::debug;
 
     #[test(creator=@owner)]
@@ -114,7 +136,7 @@ module owner::FURToken {
         let metadata = get_metadata();
         // debug::print(&metadata);
         mint(signer::address_of(&alice), 100);
-        transfer(
+        transfer_with_ref(
             signer::address_of(&alice),
             signer::address_of(&bob),
             10
@@ -130,6 +152,8 @@ module owner::FURToken {
             signer::address_of(&bob),
             20
         );
+
+        transfer(&alice, signer::address_of(&bob), 10);
        
         // let fa = fungible_asset::mint(&furToken.mint_ref, 10000);
         // primary_fungible_store::deposit(signer::address_of(&alice), fa);
