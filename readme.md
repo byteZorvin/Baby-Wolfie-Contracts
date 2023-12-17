@@ -13,3 +13,11 @@
 2. Add more events
 3. Check if more view functions would be needed
 4. Make sure the config has proper values, the probabilities and description/names.
+5. check 86400 value of earning rate before deploying
+6. Check all config values
+
+Things to be done
+1. add claim fn in frontend (handle decimals of claimable fur amount)
+2. add staking n unstaking balance in ui
+3. add modal for transaction processing/success
+4. 
