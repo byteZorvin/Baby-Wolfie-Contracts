@@ -2,8 +2,8 @@ module owner::config {
     use std::string::{Self, String};
     friend owner::NFTCollection;
 
-    const CHARACTER_COLLECTION_NAME: vector<u8> = b"CHARACTER Collection Name";
-    const CHARACTER_COLLECTION_DESCRIPTION: vector<u8> = b"CHARACTER Collection Description";
+    const CHARACTER_COLLECTION_NAME: vector<u8> = b"Baby Wolfie Game Collection";
+    const CHARACTER_COLLECTION_DESCRIPTION: vector<u8> = b"Baby Wolfie Game Collection Description";
     const CHARACTER_COLLECTION_URI: vector<u8> = b"https://CHARACTER.collection.uri";
     
     const RABBIT_TOKEN_NAME: vector<u8> = b"Rabbit Token";
@@ -15,7 +15,7 @@ module owner::config {
     const RABBIT_PROBABILITY: u64 = 50;
     const STEAL_PROBABILITY: u64 = 20;
 
-    const Gen0_Max: u128 = 2u128;
+    const Gen0_Max: u128 = 10u128;
     const Gen1_Max: u128 = 20u128;
     const Gen2_Max: u128 = 40u128;
     const Gen0_Mint_Price: u64 = 1u64;

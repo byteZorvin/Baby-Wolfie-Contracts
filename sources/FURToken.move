@@ -6,7 +6,7 @@ module owner::FURToken {
     use aptos_framework::object::{Self, Object};
     use aptos_framework::primary_fungible_store;
     use std::signer;
-    // friend owner::new_stake;
+
     friend owner::NFTCollection;
     #[test_only]
     friend owner::Test;
@@ -121,10 +121,6 @@ module owner::FURToken {
         fungible_asset::transfer(from, from_primary_store, to_primary_store, amount);
     }
 
-    
-    // #[test_only]
-    //use std::signer;
-    // use std::debug;
 
     #[test(creator=@owner)]
     fun e2e_ok(creator: &signer) acquires FurToken{

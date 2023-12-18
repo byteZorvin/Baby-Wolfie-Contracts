@@ -23,10 +23,13 @@ module owner::NFTCollection {
 
     //Error codes
     const ENOT_CREATOR: u64 = 0;
+
+    /// All NFTs of Gen0 have been minted 
     const EALL_MINTED: u64 = 1;
     
     // Insufficient apt balance to mint the NFT
     const EINSUFFICIENT_APT_BALANCE: u64 = 2;
+
     /// Staking not initialized for this account
     const E_NO_STAKE_REGISTRY: u64 = 1;
 
@@ -35,18 +38,38 @@ module owner::NFTCollection {
 
     /// Not enough funds in account to stake the amount given
     const E_NOT_ENOUGH_FUNDS_TO_STAKE: u64 = 3;
+
     /// Not enough funds in the pool to unstake the amount given
     const E_NOT_ENOUGH_FUNDS_TO_UNSTAKE: u64 = 4;
 
-    const E_INVALID_VECTOR_LENGTH: u64 = 5;
 
     struct AssetMintingEvent has drop, store {
         receiver: address,
         asset_minted: address,
     } 
 
+    struct StakingEvent has drop, store {
+        staker: address,
+        asset_staked: address,
+        amount: u64,
+    }
+
+    struct UnstakingEvent has drop, store {
+        staker: address,
+        asset_unstaked: address,
+        amount: u64,
+    }
+
+    struct WolfEarningEvent has drop, store {
+        staker: address,
+        staker_earning: u64,
+    }
+
     struct Events has key {
         asset_minting_events: event::EventHandle<AssetMintingEvent>,
+        staking_events: event::EventHandle<StakingEvent>,
+        unstaking_events: event::EventHandle<UnstakingEvent>,
+        wolf_earning_event: event::EventHandle<WolfEarningEvent>,
     }
 
     #[resource_group_member(group = aptos_framework::object::ObjectGroup)]
@@ -128,6 +151,9 @@ module owner::NFTCollection {
         move_to(&owner_signer, tax_pool_info);
         move_to(owner, Events {
             asset_minting_events: account::new_event_handle<AssetMintingEvent>(owner),
+            staking_events: account::new_event_handle<StakingEvent>(owner),
+            unstaking_events: account::new_event_handle<UnstakingEvent>(owner),
+            wolf_earning_event: account::new_event_handle<WolfEarningEvent>(owner),
         });
     }
 
@@ -137,7 +163,7 @@ module owner::NFTCollection {
         let description = config::collection_description();
         let name = config::collection_name();
         let uri = config::collection_uri();
-        let maxSupply = 2;    // No of different tokens
+        let maxSupply = 2;    // No of different tokens (wolf n rabbit)
 
         // Creates the collection with fixed supply
         collection::create_fixed_collection(
@@ -201,8 +227,6 @@ module owner::NFTCollection {
         move_to(&object_signer, character_token);
     }
 
-
-
     #[view]
     public fun rabbit_token_address(): address {
         token::create_token_address(&@owner, &config::collection_name(), &config::rabbit_token_name())
@@ -213,7 +237,6 @@ module owner::NFTCollection {
         token::create_token_address(&@owner, &config::collection_name(), &config::baby_wolfie_token_name())
     }
     
-
     #[view]
     public fun get_balance_rabbit(user: address): u64{
         primary_fungible_store::balance(user, get_metadata(config::rabbit_token_name()))
@@ -225,20 +248,23 @@ module owner::NFTCollection {
     }  
 
     #[view]
-    public fun get_suppply(): Option<u128> {
+    public fun get_wolfie_supply(): Option<u128> {
         let wolfie_metadata = get_metadata(config::baby_wolfie_token_name());
         fungible_asset::supply(wolfie_metadata)
     }
 
     #[view]
-    public fun get_wolfie_supply(): Option<u128> {
+    public fun get_rabbit_supply(): Option<u128> {
         let rabbit_metadata = get_metadata(config::rabbit_token_name());
         fungible_asset::supply(rabbit_metadata)
     }
-    // #[view]
-    // public fun get_rabbit_pool(user: address) acquires RabbitPool {
 
-    // }
+    #[view]
+    public fun get_total_supply(): u128 {
+        let wolf_supply = option::destroy_some<u128>(get_wolfie_supply());
+        let rabbit_supply = option::destroy_some<u128>(get_rabbit_supply());
+        return wolf_supply + rabbit_supply
+    }
     
     public entry fun mint(creator: &signer, receiver: address, amount: u64) acquires Character, Events, WolfStakerRegistry {
         let i = 1;
@@ -286,7 +312,6 @@ module owner::NFTCollection {
         //Total token supply 
         let token_current_supply = option::destroy_some<u128>(fungible_asset::supply(token));
 
-
         if(token_current_supply < config::gen0_max()) {
             debug::print(&string::utf8(b"token supply less than gen0_max"));
             debug::print(&token_current_supply);
@@ -333,16 +358,17 @@ module owner::NFTCollection {
         
     }
 
+    // TODO: Before mainnet deployment
     #[view]
     public fun mint_cost(current_supply: u128): u64 {
         if (current_supply < config::gen0_max()) {
             return 0u64
         } else if (current_supply <= config::gen1_max()) {
-            return 20u64
+            return 2u64
         } else if (current_supply <= config::gen2_max()) {
-            return 40u64
+            return 4u64
         };
-        80u64
+        8u64
     }
 
     #[view]
@@ -386,8 +412,8 @@ module owner::NFTCollection {
         staker: &signer,
         asset_metadata_object: Object<Character>,
         amount: u64
-    ) acquires StakePoolRegistry, RabbitPool, WolfPool, TaxPool, WolfStakerRegistry {
-        
+    ) acquires StakePoolRegistry, RabbitPool, WolfPool, TaxPool, WolfStakerRegistry, Events {
+        let asset_metadata_address = object::object_address(&asset_metadata_object);
         let staker_addr = signer::address_of(staker);
         
         // Ensure you can actually stake this amount
@@ -451,6 +477,14 @@ module owner::NFTCollection {
 
             push_staker(staker_addr);
         };
+        event::emit_event<StakingEvent>(
+            &mut borrow_global_mut<Events>(@owner).staking_events, 
+            StakingEvent {
+                staker: staker_addr,
+                asset_staked: asset_metadata_address,
+                amount
+            }
+        );
     }
 
     // Address in vector is stored at x-1 if map gives x for the same address
@@ -534,11 +568,15 @@ module owner::NFTCollection {
         let asset_metadata_address = object::object_address(&asset_metadata_object);
         let pool_address = retrieve_stake_pool_address(staker_addr, asset_metadata_address);
         let pool = borrow_global_mut<RabbitPool>(pool_address);
-        pool.unclaimed_rabbit_earnings
+
+        let time_elapsed = timestamp::now_seconds() - pool.last_update;
+        let rabbit_earnings = (pool.rabbit_staked_amount * config::daily_earning_rate() * time_elapsed);
+        pool.unclaimed_rabbit_earnings + rabbit_earnings
     }
 
     public entry fun claim_rabbit_fur_earnings(pool_address: address, staker_addr: address, all_stolen: bool) acquires RabbitPool, TaxPool {
         debug::print(&string::utf8(b"inside rabbit claim fun"));
+        update_earnings(&pool_address);
         let pool = borrow_global_mut<RabbitPool>(pool_address);
         let tax_pool_addr = object::create_object_address(&@owner, b"staking_module");
         debug::print(&string::utf8(b"Unclaimed Rabbit Earning to be claimed"));
@@ -560,7 +598,7 @@ module owner::NFTCollection {
         update_exchange_rate(0, tax_share, true);
     }
 
-    fun disburse_wolf_tax_earnings(staker: address, amount: u64) acquires TaxPool {
+    fun disburse_wolf_tax_earnings(staker: address, amount: u64) acquires TaxPool, Events {
         let tax_pool = borrow_global_mut<TaxPool>(object::create_object_address(&@owner, b"staking_module")); 
         let tax_pool_signer = object::generate_signer_for_extending(&tax_pool.extend_ref);  
         let (assets, shares) = get_exchange_rate();
@@ -569,6 +607,13 @@ module owner::NFTCollection {
             primary_fungible_store::transfer(&tax_pool_signer, FURToken::get_metadata(), staker, staker_earning);
         };
         update_exchange_rate(amount, staker_earning, false);
+        event::emit_event<WolfEarningEvent>(
+            &mut borrow_global_mut<Events>(@owner).wolf_earning_event, 
+            WolfEarningEvent {
+                staker,
+                staker_earning, 
+            }
+        );
     }
 
     /// Removes stake from the pool
@@ -576,11 +621,9 @@ module owner::NFTCollection {
         staker: &signer,
         asset_metadata_object: Object<Character>,
         amount: u64
-    ) acquires StakePoolRegistry, RabbitPool, WolfPool, WolfStakerRegistry, TaxPool {
+    ) acquires StakePoolRegistry, RabbitPool, WolfPool, WolfStakerRegistry, TaxPool, Events {
         let asset_metadata_address = object::object_address(&asset_metadata_object);
         let pool_address = retrieve_stake_pool_address(signer::address_of(staker), asset_metadata_address);
-
-        
         let staker_addr = signer::address_of(staker);  
 
         // Check that we have enough to remove
@@ -590,7 +633,6 @@ module owner::NFTCollection {
         );
 
         if(get_metadata(config::rabbit_token_name()) == asset_metadata_object) {
-            update_earnings(&pool_address);
             let rabbit_pool = borrow_global_mut<RabbitPool>(pool_address);
             let rabbit_pool_signer = object::generate_signer_for_extending(&rabbit_pool.extend_ref);
             rabbit_pool.rabbit_staked_amount = rabbit_pool.rabbit_staked_amount-amount;
@@ -633,6 +675,14 @@ module owner::NFTCollection {
             // Transfer the user with its tax earnings
             disburse_wolf_tax_earnings(staker_addr, amount)
         };
+        event::emit_event<UnstakingEvent>(
+            &mut borrow_global_mut<Events>(@owner).unstaking_events, 
+            UnstakingEvent {
+                staker: staker_addr,
+                asset_unstaked: asset_metadata_address,
+                amount
+            }
+        );
     }
 
     fun create_stake_registry(staker: &signer) {
