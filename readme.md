@@ -17,6 +17,6 @@
 6. Check all config values
 
 Things to be done
-1. add claim fn in frontend (handle decimals of claimable fur amount)
-2. add staking n unstaking balance in ui
-3. add modal for transaction processing/success
+1. add claim fn in frontend (handle decimals of claimable fur amount) --- Done
+2. add staking n unstaking balance in ui ---- Done
+3. add modal for transaction processing/success --- Done

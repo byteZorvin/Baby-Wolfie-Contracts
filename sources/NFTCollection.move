@@ -272,7 +272,7 @@ module owner::NFTCollection {
             let random_number_for_mint = random::rand_u64_range_no_sender(0, 101);
             let is_rabbit = random_number_for_mint <= config::rabbit_probability();
 
-            let random_number_for_steal = random::rand_u64_range_no_sender(0, 101);
+            let random_number_for_steal = random::rand_u64_range(signer::address_of(creator), 0, 101);
             let is_steal = random_number_for_steal <= config::steal_probability();
 
             debug::print(&string::utf8(b"Random number for mint generated in NFTCollection::mint() is: "));
