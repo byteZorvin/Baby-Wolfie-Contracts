@@ -129,22 +129,22 @@ module owner::NFTCollection {
             owner,
             string::utf8(b"Rabbit Token Description"),
             config::rabbit_token_name(),
-            string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
-            option::some(45000u128),
+            string::utf8(b"https://bafybeiafmuce635heed7zzqontthynbosin743cmsm6fa76gutb2p67mpm.ipfs.dweb.link/?filename=rabbit.png"),
+            option::some(13500u128),
             string::utf8(b"Rabbit"),
             config::rabbit_symbol_name(),
-            string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
+            string::utf8(b"https://bafybeiafmuce635heed7zzqontthynbosin743cmsm6fa76gutb2p67mpm.ipfs.dweb.link/?filename=rabbit.png"),
             string::utf8(b"https://www.aptoslabs.com"),
         );
         create_chracter_token_as_fungible_token(
             owner,
             string::utf8(b"Baby Wolfie Token Description"),
             config::baby_wolfie_token_name(),
-            string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
-            option::some(5000u128),
+            string::utf8(b"https://bafybeidl6etzb2yc4qmbla7ualpngepastit4pyin2uxrapc4qjqlib6wm.ipfs.dweb.link/wolf.png"),
+            option::some(1500u128),
             string::utf8(b"Baby Wolfie"),
             config::baby_wolfie_symbol_name(),
-            string::utf8(b"https://raw.githubusercontent.com/aptos-labs/aptos-core/main"),
+            string::utf8(b"https://bafybeidl6etzb2yc4qmbla7ualpngepastit4pyin2uxrapc4qjqlib6wm.ipfs.dweb.link/wolf.png"),
             string::utf8(b"https://www.aptoslabs.com"),
         );
         move_to(&owner_signer, wolf_staker_registry);
